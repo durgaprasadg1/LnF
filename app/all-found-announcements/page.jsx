@@ -7,31 +7,25 @@ import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-export default function AllLostRequests() {
-  const [lostItems, setLostItems] = useState([]);
+export default function AllFoundAnnouncements() {
+  const [foundItems, setFoundItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  
   useEffect(() => {
     async function fetchItems() {
-      try {
-        const res = await fetch("/api/items/lost"); 
-        const data = await res.json();
-        setLostItems(data.items || []);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
+      const res = await fetch("/api/items/found");
+      const data = await res.json();
+      setFoundItems(data.items || []);
+      setLoading(false);
     }
-
     fetchItems();
   }, []);
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-16">
-      
+
       <h1 className="text-4xl font-bold mb-10 text-center">
-        Lost Items
+        Found Items
       </h1>
 
       {loading && (
@@ -40,15 +34,15 @@ export default function AllLostRequests() {
         </div>
       )}
 
-      {!loading && lostItems.length === 0 && (
+      {!loading && foundItems.length === 0 && (
         <p className="text-center text-gray-500 text-lg">
-          No lost items reported yet.
+          No items found posted yet.
         </p>
       )}
 
       <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-10 mt-6">
         {!loading &&
-          lostItems.map((item) => (
+          foundItems.map((item) => (
             <motion.div
               key={item._id}
               initial={{ opacity: 0, y: 40 }}
@@ -56,9 +50,7 @@ export default function AllLostRequests() {
               transition={{ duration: 0.4 }}
             >
               <Card className="shadow-md hover:shadow-lg transition">
-                
                 <CardContent className="p-4">
-                  
                   <div className="w-full h-52 bg-gray-100 rounded-lg overflow-hidden mb-4">
                     <Image
                       src={item.itemImage?.url || "/placeholder.png"}
@@ -77,9 +69,9 @@ export default function AllLostRequests() {
                     {item.category}
                   </Badge>
 
-                  {item.lostAt && (
+                  {item.foundAt && (
                     <p className="text-gray-600 mt-3">
-                      <strong>Lost at:</strong> {item.lostAt}
+                      <strong>Found at:</strong> {item.foundAt}
                     </p>
                   )}
 
@@ -88,11 +80,9 @@ export default function AllLostRequests() {
                   </p>
 
                   <p className="text-gray-400 text-xs mt-4">
-                    Reported on: {new Date(item.reportedAt).toLocaleDateString()}
+                    Posted on: {new Date(item.reportedAt).toLocaleDateString()}
                   </p>
-
                 </CardContent>
-
               </Card>
             </motion.div>
           ))}
