@@ -1,6 +1,29 @@
-/** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* config options here */
+  images: {
+    domains: [
+      "lh3.googleusercontent.com",
+      "lh4.googleusercontent.com",
+      "lh5.googleusercontent.com",
+    ],
+  },
+  headers: async () => {
+    return [
+      {
+        source: "/(.*)",
+
+        headers: [
+          {
+            key: "Cross-Origin-Opener-Policy",
+            value: "unsafe-none",
+          },
+          {
+            key: "Cross-Origin-Embedder-Policy",
+            value: "unsafe-none",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
