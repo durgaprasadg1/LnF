@@ -41,7 +41,6 @@ export default function MyLostRequests() {
           return;
         }
         const data = await res.json();
-        console.log("Datadata", data);
         setItems(data.items || []);
       } catch (err) {
         console.error("Failed to load lost requests:", err);
@@ -63,7 +62,6 @@ export default function MyLostRequests() {
   }
 
   if (!user) return <UnauthorizedBox />;
-  console.log("ITEMS:", items);
   const total = items?.length;
   const pending = items?.filter((i) => !i.isResolved).length;
   const found = items?.filter((i) => i.isFound).length;

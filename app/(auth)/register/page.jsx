@@ -72,7 +72,7 @@ export default function SignupPage() {
             {loading ? "Creating..." : "Sign Up"}
           </Button>
         </form>
-        <div className="my-6 text-center text-gray-500">OR</div>
+        <div className="my-3 text-center text-gray-500">OR</div>
         <Button
           onClick={async () => {
             setLoading(true);

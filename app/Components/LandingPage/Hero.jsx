@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 export default function Hero() {
-  const { user, mongoUser } = useAuth();
+  const { mongoUser } = useAuth();
 
   return (
     <div className="w-full bg-white mt-15">

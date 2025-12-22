@@ -31,8 +31,23 @@ export function AuthProvider({ children }) {
     return () => unsub();
   }, []);
 
+  async function refreshMongoUser() {
+    if (!user) return;
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch("/api/auth/sync", {
+        method: "POST",
+        body: JSON.stringify({ idToken: token }),
+      });
+      const data = await res.json();
+      setMongoUser(data.user);
+    } catch (err) {
+      console.error("refreshMongoUser error", err);
+    }
+  }
+
   return (
-    <AuthContext.Provider value={{ user, mongoUser }}>
+    <AuthContext.Provider value={{ user, mongoUser, refreshMongoUser }}>
       {children}
     </AuthContext.Provider>
   );

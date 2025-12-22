@@ -22,6 +22,16 @@ export default function AllFoundAnnouncements() {
   }, []);
 
   return (
+    <>
+    {foundItems.length > 0 && (<marquee
+          behavior="scroll"
+          direction="left"
+          className="text-stone-900 font-semibold mt-2"
+        >
+          The item from the listing will be deleted automatically after 10 days.
+        </marquee>
+    )}
+   
     <div className="max-w-6xl mx-auto px-6 py-16">
 
       <h1 className="text-4xl font-bold mb-10 text-center">
@@ -88,5 +98,6 @@ export default function AllFoundAnnouncements() {
           ))}
       </div>
     </div>
+    </>
   );
 }

@@ -59,6 +59,7 @@ const itemSchema = new Schema(
       ref: "User",
       required: true,
     },
+    
 
     reportedAt: {
       type: Date,

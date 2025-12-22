@@ -91,6 +91,9 @@ const userSchema = new Schema(
       type: String,
       default: "#f3f4f6",
     },
+    notification : [{
+        type : String,
+    }]
   },
   { timestamps: true }
 );
