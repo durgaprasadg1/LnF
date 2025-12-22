@@ -73,10 +73,15 @@ const itemSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isApproved: {
+      type: Boolean,
+      default: false,
+    },
   },
 
-  { timestamps: true } 
+  { timestamps: true }
 );
 
+itemSchema.index({ reportedAt: 1 }, { expireAfterSeconds: 864000 });
 
 export default mongoose.models.Item || mongoose.model("Item", itemSchema);

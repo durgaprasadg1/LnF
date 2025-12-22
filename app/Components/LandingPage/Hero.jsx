@@ -38,7 +38,7 @@ export default function Hero() {
               </Button>
             </Link>
 
-            <Link href={`/user/${mongoUser._id}/new-found-request`}>
+            <Link href={`/user/${mongoUser._id}/new-found-announcement`}>
               <Button size="lg" variant="outline">
                 Found an Item
               </Button>

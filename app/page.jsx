@@ -5,7 +5,6 @@ import Stats from "./Components/LandingPage/Stats";
 import Footer from "./Components/LandingPage/Footer";
 
 export default function Home() {
-
   return (
     <main>
       <Hero />

@@ -3,9 +3,10 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Loader2, Scroll } from "lucide-react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -20,13 +21,12 @@ import {
 export default function AllLostRequests() {
   const [lostItems, setLostItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const { user, mongoUser } = useAuth();
   useEffect(() => {
     async function fetchItems() {
       try {
         const res = await fetch("/api/items/lost");
         const data = await res.json();
-        console.log("DAATA:", data.items[0].postedBy);
         setLostItems(data.items || []);
       } catch (err) {
         console.log(err);
@@ -39,9 +39,15 @@ export default function AllLostRequests() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-16">
+    <>
+    <marquee behavior="scroll" direction="left" className="text-stone-800 font-semibold mt-2">
+          The item from the listing will be deleted automatically after 10 days.
+      </marquee>
+   
+    <div className="max-w-6xl mx-auto px-6 py-8">
+      
       <h1 className="text-4xl font-bold mb-10 text-center">Lost Items</h1>
-
+      
       {loading && (
         <div className="flex justify-center py-20">
           <Loader2 className="animate-spin h-10 w-10 text-gray-800" />
@@ -93,6 +99,7 @@ export default function AllLostRequests() {
                     Reported on:{" "}
                     {new Date(item.reportedAt).toLocaleDateString()}
                   </p>
+                  {user && mongoUser ? (
                   <div className="flex items-center justify-between mt-2 gap-2">
                     <Dialog className="mt-2">
                       <DialogTrigger asChild>
@@ -135,12 +142,13 @@ export default function AllLostRequests() {
                     <Button variant="outline" className="bg-green-600 text-white">
                       Mark Found
                     </Button>
-                  </div>
+                  </div>): (<p className="mt-1 text-sm font-bold opacity-100"> Log in to help the owner</p>)}
                 </CardContent>
               </Card>
             </motion.div>
           ))}
       </div>
     </div>
+     </>
   );
 }
