@@ -7,6 +7,7 @@ import { googleSignin } from "@/actions/googleSignin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FcGoogle } from "react-icons/fc";
+import { toast } from "react-hot-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,12 +15,23 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { user, mongoUser } = useAuth();
-  
 
   async function handleLogin(e) {
     e.preventDefault();
     setLoading(true);
     try {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const pwdRegex = /^.{6,}$/;
+      if (!emailRegex.test(email)) {
+        toast.error("Enter a valid email address");
+        setLoading(false);
+        return;
+      }
+      if (!pwdRegex.test(password)) {
+        toast.error("Password must be at least 6 characters");
+        setLoading(false);
+        return;
+      }
       await login(email, password);
       router.push("/");
     } catch (err) {
@@ -72,7 +84,7 @@ export default function LoginPage() {
               await googleSignin();
               router.push("/");
             } catch (err) {
-              // Error is handled by toast in the googleSignin action
+              console.log("Login Error : ", err);
             }
             setLoading(false);
           }}

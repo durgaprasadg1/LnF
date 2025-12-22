@@ -20,6 +20,7 @@ import {
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
+import { toast } from "react-hot-toast";
 
 export default function EditProfileModal({ open, setOpen, mongoUser }) {
   const { user } = useAuth();
@@ -34,6 +35,38 @@ export default function EditProfileModal({ open, setOpen, mongoUser }) {
 
   async function submit() {
     if (!user) return;
+
+    // Validation using regex
+    const nameRegex = /^[A-Za-z\s]{2,100}$/;
+    const phoneRegex = /^[0-9+\-\s]{7,20}$/;
+    const bioRegex = /^.{0,500}$/s;
+    const allowedDeps = [
+      "Computer Engineering",
+      "Electrical Engineering",
+      "Mechanical Engineering",
+      "Civil Engineering",
+      "Non-teaching Staff",
+      "Teaching Staff",
+      "Library Staff",
+      "Other",
+    ];
+
+    if (!form.name || !nameRegex.test(form.name)) {
+      toast.error("Enter a valid name (letters and spaces only)");
+      return;
+    }
+    if (form.phone && !phoneRegex.test(form.phone)) {
+      toast.error("Enter a valid phone number");
+      return;
+    }
+    if (form.department && !allowedDeps.includes(form.department)) {
+      toast.error("Select a valid department");
+      return;
+    }
+    if (form.bio && !bioRegex.test(form.bio)) {
+      toast.error("Bio must be 500 characters or less");
+      return;
+    }
 
     const token = await user.getIdToken(true);
 
@@ -80,17 +113,30 @@ export default function EditProfileModal({ open, setOpen, mongoUser }) {
 
           <div className="space-y-1">
             <label className="text-sm">Department</label>
-            <Select value={form.department} onValueChange={(value) => setForm({ ...form, department: value })}>
+            <Select
+              value={form.department}
+              onValueChange={(value) => setForm({ ...form, department: value })}
+            >
               <SelectTrigger className="w-45">
                 <SelectValue placeholder="Select a fruit" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="Computer Engineering">Computer Engineering</SelectItem>
-                  <SelectItem value="Electrical Engineering">Electrical Engineering</SelectItem>
-                  <SelectItem value="Mechanical Engineering">Mechanical Engineering</SelectItem>
-                  <SelectItem value="Civil Engineering">Civil Engineering</SelectItem>
-                  <SelectItem value="Non-teaching Staff">Non-teaching Staff</SelectItem>
+                  <SelectItem value="Computer Engineering">
+                    Computer Engineering
+                  </SelectItem>
+                  <SelectItem value="Electrical Engineering">
+                    Electrical Engineering
+                  </SelectItem>
+                  <SelectItem value="Mechanical Engineering">
+                    Mechanical Engineering
+                  </SelectItem>
+                  <SelectItem value="Civil Engineering">
+                    Civil Engineering
+                  </SelectItem>
+                  <SelectItem value="Non-teaching Staff">
+                    Non-teaching Staff
+                  </SelectItem>
                   <SelectItem value="Teaching Staff">Teaching Staff</SelectItem>
                   <SelectItem value="Library Staff">Library Staff</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
@@ -98,8 +144,6 @@ export default function EditProfileModal({ open, setOpen, mongoUser }) {
               </SelectContent>
             </Select>
           </div>
-
-          
 
           <div className="space-y-1">
             <label className="text-sm">Bio</label>

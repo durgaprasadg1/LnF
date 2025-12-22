@@ -8,12 +8,18 @@ import { motion } from "framer-motion";
 import StatCard from "../../Components/User/StatCard";
 import QuickActions from "../../Components/User/QuickActions";
 import AchievementBanner from "../../Components/User/AchievementBanner";
+import { Loader2 } from "lucide-react";
 export default function ProfilePage() {
   const { user, mongoUser } = useAuth();
   console.log("Mongo User in Profile Page: ", mongoUser);
   const [open, setOpen] = useState(false);
 
-  if (!user || !mongoUser) return <p>Loading...</p>;
+  if (!user || !mongoUser)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Loader2 className="animate-spin h-10 w-10 text-gray-800" />
+      </div>
+    );
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
@@ -42,6 +48,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex-1" />
+
         <button
           onClick={() => setOpen(true)}
           className="bg-white text-stone-800 px-4 py-2 rounded-md font-medium hover:bg-gray-200"
@@ -49,16 +56,25 @@ export default function ProfilePage() {
           Edit Profile
         </button>
       </motion.div>
-      <div className="grid md:grid-cols-3 grid-cols-1 gap-6 mt-10">
+      {mongoUser.bio && (
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-6 text-center text-gray-700 italic bg-stone-200 py-3 rounded-2xl"
+
+        >
+          {mongoUser.bio}
+        </motion.p>
+      )}
+      <div className="grid md:grid-cols-2 grid-cols-1 gap-6 mt-10 ">
         <StatCard
           title="Lost Requests"
-          value={mongoUser.items.filter((i) => i.isLost).length}
+          value={mongoUser.totalLostRequests || 0}
         />
         <StatCard
           title="Found Announcements"
-          value={mongoUser.items.filter((i) => i.isFound).length}
+          value={mongoUser.itemsReturned || 0}
         />
-        <StatCard title="Items Returned" value={mongoUser.itemsReturned} />
       </div>
       <QuickActions mongoUser={mongoUser} />
       <AchievementBanner count={mongoUser.itemsReturned} />

@@ -31,10 +31,7 @@ export async function POST(req, { params }) {
   if (!mongoUser)
     return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  // The user model in this project does not store the Firebase UID field.
-  // Authorize by comparing the decoded token email with the mongo user's email.
-  // (If you later add a `firebaseUID` field to the User model, you can
-  // switch this check to compare UIDs instead.)
+  
   if (mongoUser.email !== decoded.email) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

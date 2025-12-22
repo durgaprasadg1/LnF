@@ -1,5 +1,5 @@
 "use client";
-import { useState , useEffect} from "react";
+import { useState, useEffect } from "react";
 import { signup } from "@/actions/signup";
 import { googleSignin } from "@/actions/googleSignin";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
+import { toast } from "react-hot-toast";
 
 export default function SignupPage() {
   const { user, mongoUser } = useAuth();
@@ -19,15 +20,26 @@ export default function SignupPage() {
     e.preventDefault();
     setLoading(true);
     try {
+      // Basic front-end validation
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const pwdRegex = /^.{6,}$/;
+      if (!emailRegex.test(email)) {
+        toast.error("Enter a valid email address");
+        setLoading(false);
+        return;
+      }
+      if (!pwdRegex.test(password)) {
+        toast.error("Password must be at least 6 characters");
+        setLoading(false);
+        return;
+      }
       await signup(email, password);
       router.push("/");
     } catch (err) {
       console.log("Error while Registering : ", err);
-    }
-    finally{
+    } finally {
       setLoading(false);
     }
-    
   }
   useEffect(() => {
     if (user && mongoUser) {

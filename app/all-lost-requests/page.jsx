@@ -17,9 +17,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
 export default function AllLostRequests() {
   const [lostItems, setLostItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,7 +26,7 @@ export default function AllLostRequests() {
       try {
         const res = await fetch("/api/items/lost");
         const data = await res.json();
-        console.log("DAATA:", data);
+        console.log("DAATA:", data.items[0].postedBy);
         setLostItems(data.items || []);
       } catch (err) {
         console.log(err);
@@ -78,7 +75,7 @@ export default function AllLostRequests() {
                     />
                   </div>
 
-                  <h2 className="text-xl font-semibold">{item.itemName}</h2>
+                  <h2 className="text-xl font-semibold">{item.itemName} </h2>
 
                   <Badge className="mt-2">{item.category}</Badge>
 
@@ -107,17 +104,17 @@ export default function AllLostRequests() {
                         </Button>
                       </DialogTrigger>
                       <DialogContent className="sm:max-w-106.25">
-                        <DialogTitle>Name : {item.postedyby?.name}</DialogTitle>
+                        <DialogTitle className="text-black">Name : {item.postedBy?.name}</DialogTitle>
                         <DialogTitle>
-                          Phone : {item.postedyby?.phone}
+                          Phone : {item.postedBy?.phone}
                         </DialogTitle>
                         <DialogTitle>
                           Owner :{" "}
                           <div className="w-full h-52 bg-gray-100 rounded-lg overflow-hidden mb-4">
                             <Image
-                              src={item.itemImage?.url || "/placeholder.png"}
+                              src={item.postedBy?.profilePicture?.url || "/placeholder.png"}
                               alt={
-                                item.postedyby?.profilePicture?.url ||
+                                item.postedBy?.profilePicture?.url ||
                                 "Profile Picture"
                               }
                               width={400}
@@ -131,7 +128,7 @@ export default function AllLostRequests() {
                           <DialogClose asChild>
                             <Button variant="outline">Cancel</Button>
                           </DialogClose>
-                          <Button type="submit">Save changes</Button>
+                         
                         </DialogFooter>
                       </DialogContent>
                     </Dialog>
