@@ -122,13 +122,13 @@ export default function TopPerformers() {
 
         <div className="flex justify-center gap-4">
           <Link
-            href="/all-lost-requests"
+            href="/user/all-lost-requests"
             className="px-6 py-3 bg-stone-800 text-white rounded-md"
           >
             Browse Lost Items
           </Link>
           <Link
-            href="/user/sessionid/new-found-announcement"
+            href={`/user/${mongoUser?._id}/new-found-announcement`}
             className="px-6 py-3 border border-stone-600 text-stone-800 rounded-md"
           >
             Report Found Item

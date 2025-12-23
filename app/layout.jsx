@@ -1,7 +1,7 @@
+;
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import "react-toastify/dist/ReactToastify.css";
-import Navbar from "./Components/Others/Navbar";
 import { ToastContainer } from "react-toastify";
 import { AuthProvider } from "@/context/AuthContext";
 
@@ -25,7 +25,6 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         <AuthProvider>
-          <Navbar />
           {children}
           <ToastContainer position="top-right" />
         </AuthProvider>

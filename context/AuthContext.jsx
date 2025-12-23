@@ -8,8 +8,19 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [mongoUser, setMongoUser] = useState(null);
+  const [admin, setAdmin] = useState(null);
 
   useEffect(() => {
+    // Check for admin session in localStorage
+    const adminSession = localStorage.getItem("adminSession");
+    if (adminSession) {
+      try {
+        setAdmin(JSON.parse(adminSession));
+      } catch (e) {
+        localStorage.removeItem("adminSession");
+      }
+    }
+
     const unsub = onAuthStateChanged(auth, async (u) => {
       if (!u) {
         setUser(null);
@@ -47,7 +58,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, mongoUser, refreshMongoUser }}>
+    <AuthContext.Provider value={{ user, mongoUser, admin, refreshMongoUser }}>
       {children}
     </AuthContext.Provider>
   );

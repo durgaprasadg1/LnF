@@ -34,7 +34,7 @@ const userSchema = new Schema(
 
     role: {
       type: String,
-      enum: ["student", "staff", "admin"],
+      enum: ["student", "admin"],
       default: "student",
     },
 
@@ -52,9 +52,6 @@ const userSchema = new Schema(
       ],
       default: "Other",
     },
-
-  
-
     profilePicture: {
       url: String,
       filename: String,
@@ -93,7 +90,15 @@ const userSchema = new Schema(
     },
     notification : [{
         type : String,
-    }]
+    }],
+    isBlocked : {
+      type : Boolean,
+      default : false,
+    },
+    isUser : {
+      type : Boolean,
+      default : true,
+    }
   },
   { timestamps: true }
 );

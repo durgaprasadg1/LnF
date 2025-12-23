@@ -33,7 +33,7 @@ export default function NewFoundAnnouncement({ params }) {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!["image/png", "image/jpeg"].includes(file.type)) {
+    if (!["image/png", "image/jpeg", "image/jpg"].includes(file.type)) {
       alert("Only PNG and JPG images are allowed");
       return;
     }
@@ -58,7 +58,6 @@ export default function NewFoundAnnouncement({ params }) {
   async function submit() {
     if (!user) return;
 
-    // Regex validations
     const nameRegex = /^[A-Za-z0-9\s\-\.,]{2,100}$/;
     const descRegex = /^.{5,500}$/s;
     const placeRegex = /^[A-Za-z0-9\s\,\-\#]{3,200}$/;
@@ -104,7 +103,7 @@ export default function NewFoundAnnouncement({ params }) {
       body: JSON.stringify(form),
     });
     router.refresh();
-    router.push("/all-found-announcements");
+    router.push("/user/all-found-announcements");
   }
 
   return (

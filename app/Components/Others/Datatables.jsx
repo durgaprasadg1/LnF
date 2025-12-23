@@ -102,7 +102,7 @@ export function GridView({ data, renderCard, columns = 3, gap = 16 }) {
     return (
       <div
         key={index}
-        className="p-4 border border-border rounded-xl bg-card hover:border-muted-foreground/50 transition-all duration-200 flex flex-col gap-3"
+        className="p-4 border border-border rounded-xl bg-card hover:border-muted-foreground/50 transition-all duration-200 flex flex-col gap-3 "
       >
         <div className="flex items-start justify-between gap-2">
           <h3 className="font-semibold text-base leading-tight">{title}</h3>
@@ -253,13 +253,13 @@ export function DataTable({ columns, data, filters = [], showFilters = true }) {
             onValueChange={(v) =>
               setPagination((p) => ({ ...p, pageSize: Number(v), pageIndex: 0 }))
             }
-          >
-            <SelectTrigger className="h-8 cursor-pointer rounded-md border border-input bg-background px-2 text-sm">
+>
+            <SelectTrigger className="h-8 cursor-pointer rounded-md border border-input bg-background px-2 text-sm  text-black w-auto">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="text-black">
               {[10, 20, 30, 40, 50].map((s) => (
-                <SelectItem key={s} value={String(s)}>
+                <SelectItem key={s} value={String(s)} className="text-black">
                   {s}
                 </SelectItem>
               ))}
@@ -271,14 +271,14 @@ export function DataTable({ columns, data, filters = [], showFilters = true }) {
       {/* Table */}
       <div className="overflow-hidden rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader >
             {table.getHeaderGroups().map((group) => (
-              <TableRow key={group.id}>
+              <TableRow key={group.id} >
                 {group.headers.map((header) => {
                   const canSort = header.column.getCanSort();
                   const sortState = header.column.getIsSorted();
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="text-white">
                       {header.isPlaceholder ? null : (
                         <button
                           className="flex items-center gap-2"
@@ -308,7 +308,7 @@ export function DataTable({ columns, data, filters = [], showFilters = true }) {
           <TableBody>
             {table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id}>
+                <TableRow key={row.id} className="text-white">
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -329,7 +329,7 @@ export function DataTable({ columns, data, filters = [], showFilters = true }) {
 
       {/* Pagination */}
       <div className="flex items-center justify-between py-4">
-        <div className="text-sm text-muted-foreground">
+        <div className="text-sm text-muted-foreground text-white">
           Showing{" "}
           {pagination.pageIndex * pagination.pageSize + 1} -{" "}
           {Math.min(
@@ -345,11 +345,12 @@ export function DataTable({ columns, data, filters = [], showFilters = true }) {
             size="sm"
             onClick={() => table.previousPage()}
             disabled={!table.getCanPreviousPage()}
+            className="text-black"
           >
             Prev
           </Button>
 
-          <div className="px-3 text-sm">
+          <div className="px-3 text-sm text-white">
             Page {pagination.pageIndex + 1} of {table.getPageCount()}
           </div>
 
@@ -358,6 +359,7 @@ export function DataTable({ columns, data, filters = [], showFilters = true }) {
             size="sm"
             onClick={() => table.nextPage()}
             disabled={!table.getCanNextPage()}
+            className="text-black"
           >
             Next
           </Button>

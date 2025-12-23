@@ -19,7 +19,7 @@ import {
 export default function AllLostRequests() {
   const [lostItems, setLostItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const { user, mongoUser } = useAuth();
+  const { user, mongoUser, refreshMongoUser } = useAuth();
   useEffect(() => {
     async function fetchItems() {
       try {
@@ -69,6 +69,8 @@ const handleMarkFound = async (itemId) => {
     console.error("Error marking item found:", error.message);
     alert(error.message || "Failed to mark as found");
   }
+  
+  refreshMongoUser();
 };
 
   return (
@@ -79,7 +81,7 @@ const handleMarkFound = async (itemId) => {
           direction="left"
           className="text-stone-800 font-semibold mt-2"
         >
-          The item from the listing will be deleted automatically after 10 days.
+          Your lost item request will be listed once admin verifies. The item from the listing will be deleted automatically after 10 days.
         </marquee>
       )}
 
@@ -102,7 +104,7 @@ const handleMarkFound = async (itemId) => {
           {!loading &&
             lostItems.map(
               (item) =>
-                !item.isVerified && !item.isResolved && (
+                item.isVerified && !item.isResolved && (
                   <motion.div
                     key={item._id}
                     initial={{ opacity: 0, y: 40 }}

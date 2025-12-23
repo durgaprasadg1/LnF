@@ -74,7 +74,7 @@ const itemSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    isApproved: {
+    isVerified: {
       type: Boolean,
       default: false,
     },

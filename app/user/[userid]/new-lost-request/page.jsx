@@ -52,7 +52,6 @@ export default function NewLostRequest() {
   async function submit() {
     if (!user) return;
 
-    // Regex validations
     const nameRegex = /^[A-Za-z0-9\s\-\.,]{2,100}$/;
     const descRegex = /^.{5,500}$/s;
     const placeRegex = /^[A-Za-z0-9\s\,\-\#]{3,200}$/;
@@ -97,7 +96,7 @@ export default function NewLostRequest() {
       body: JSON.stringify(form),
     });
     router.refresh();
-    router.push("/all-lost-requests");
+    router.push("/user/all-lost-requests");
   }
   if (!mongoUser) {
     return (

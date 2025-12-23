@@ -11,7 +11,6 @@ export default function Hero() {
   return (
     <div className="w-full bg-white mt-15">
       <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center gap-10">
-
         <motion.div
           initial={{ opacity: 0, x: -40 }}
           animate={{ opacity: 1, x: 0 }}
@@ -19,33 +18,28 @@ export default function Hero() {
           className="flex-1"
         >
           {mongoUser && (
-            <><h1 className="mt-2 text-black font-extrabold text-4xl mb-2">
-            Welcome back, {mongoUser.name.split(" ")[0]}!
-          </h1></>)}
+            <>
+              <h1 className="mt-2 text-black font-extrabold text-4xl mb-2">
+                Welcome back, {mongoUser.name.split(" ")[0]}!
+              </h1>
+            </>
+          )}
           <h1 className="text-3xl font-bold leading-tight">
             Lost items shouldn't stay lost anymore.
           </h1>
 
           <p className="mt-4 text-gray-600 text-lg">
-            A simple college-wide platform to report, find and recover items quickly.
+            A simple college-wide platform to report, find and recover items
+            quickly.
           </p>
-          {mongoUser && (
-            <>
-          <div className="mt-8 flex gap-4">
-            <Link href={`/user/${mongoUser._id}/new-lost-request`}>
-              <Button size="lg" className="bg-stone-800 text-white hover:bg-black">
-                Lost an Item
-              </Button>
-            </Link>
+          <div className="flex items-center gap-4 mt-6">
 
-            <Link href={`/user/${mongoUser._id}/new-found-announcement`}>
-              <Button size="lg" variant="outline">
-                Found an Item
-              </Button>
-            </Link>
-          </div></>
-          )}
-          
+          </div>
+          <Link href="/user" className="mt-3 inline-block ">
+            <Button size="lg" variant="outline" className="bg-gray-800 text-white hover:bg-black hover:text-white hover:cursor-pointer">
+              Get Started
+            </Button>
+          </Link>
         </motion.div>
 
         <motion.div

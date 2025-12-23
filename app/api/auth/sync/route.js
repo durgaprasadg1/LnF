@@ -12,7 +12,7 @@ export async function POST(req) {
   const name = decoded.name || email.split("@")[0];
 
   let user = await User.findOne({ email });
-
+  
   if (!user) {
     user = await User.create({
       name,
@@ -27,6 +27,7 @@ export async function POST(req) {
         url: decoded.picture || "",
         filename: "",
       },
+
     });
   }
 

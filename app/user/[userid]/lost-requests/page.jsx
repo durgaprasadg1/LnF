@@ -13,10 +13,48 @@ import Image from "next/image";
 
 export default function MyLostRequests() {
   const { userid } = useParams();
-  const { user } = useAuth();
+  const { user , refreshMongoUser} = useAuth();
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
+const handleGotItem = async (itemId) => {
+  try {
+    if(!confirm("Are you sure to mark this item as found? Your all details will be shared with the owner.")){
+      return;
+    }
+
+    if (!user) {
+      alert("You must be logged in!");
+      return;
+    }
+
+    const token = await user.getIdToken();
+
+    const res = await fetch(`/api/items/${itemId}/resolved`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      toast.error("Failed to mark as resolved");
+      console.log(data.error || "Something went wrong");
+    }
+
+    console.log("Item marked as resolved:", data);
+    toast.success("Item marked as resolved!");
+  } catch (error) {
+    console.error("Error marking item resolved:", error.message);
+    toast.error("Failed to mark as resolved");
+  }
+  
+  refreshMongoUser();
+};
 
   useEffect(() => {
     if (!user) return;
@@ -121,16 +159,23 @@ export default function MyLostRequests() {
               <div>
                 <h3 className="text-lg font-semibold">{item.itemName}</h3>
                 <p className="text-gray-600">Lost at: {item.lostAt || "N/A"}</p>
-                <span
-                  className={`inline-block mt-2 px-3 py-1 text-sm rounded-md ${
-                    item.isResolved
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
-                >
-                  {item.isResolved ? "Resolved" : "Pending"}
-                </span>
-              </div>
+               <span
+                    className={`inline-block mt-2 px-3 py-1 text-sm rounded-md mr-5 ${
+                      item.isResolved
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {item.isFound ? "Found" : item.isResolved ? "Resolved" : "Pending"}
+                  </span>
+                  <button
+                    onClick={() => handleGotItem(item._id)}
+                    className="p-1 mt-3 bg-green-600 text-white rounded hover:bg-green-700"
+                  >
+                    Got Item
+                  </button>
+                </div>
+              
             </motion.div>
           ))}
         </div>

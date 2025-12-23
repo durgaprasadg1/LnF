@@ -108,6 +108,7 @@ export default function Navbar() {
                       >
                         Remove
                       </button>
+                      
                     </div>
                   </div>
                 ))
@@ -143,18 +144,18 @@ export default function Navbar() {
             Home
           </Link>
           <Link
-            href="/all-lost-requests"
+            href="/user/all-lost-requests"
             className={isActive("/all-lost-requests")}
           >
             All Lost Items
           </Link>
           <Link
-            href="/all-found-announcements"
+            href="/user/all-found-announcements"
             className={isActive("/all-found-announcements")}
           >
             All Found Items
           </Link>
-          <Link href="/top-performers" className={isActive("/top-performers")}>
+          <Link href="/user/top-performers" className={isActive("/top-performers")}>
             Top Performers
           </Link>
         </div>
@@ -221,19 +222,19 @@ export default function Navbar() {
                   Home
                 </Link>
                 <Link
-                  href="/all-lost-requests"
+                  href="/user/all-lost-requests"
                   className={isActive("/all-lost-requests")}
                 >
                   All Lost Items
                 </Link>
                 <Link
-                  href="/all-found-announcements"
+                  href="/user/all-found-announcements"
                   className={isActive("/all-found-announcements")}
                 >
                   All Found Items
                 </Link>
                 <Link
-                  href="/top-performers"
+                  href="/user/top-performers"
                   className={isActive("/top-performers")}
                 >
                   Top Performers

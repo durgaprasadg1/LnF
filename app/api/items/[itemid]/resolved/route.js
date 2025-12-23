@@ -48,7 +48,7 @@ export async function PATCH(req, { params }) {
 
     await owner.save();
 
-    item.isFound = true;
+    item.isResolved = true;
     await item.save();
 
     return NextResponse.json({

@@ -28,7 +28,7 @@ export default function AllFoundAnnouncements() {
           direction="left"
           className="text-stone-900 font-semibold mt-2"
         >
-          The item from the listing will be deleted automatically after 10 days.
+         Your found item announcement will be listed once admin verifies. The item from the listing will be deleted automatically after 10 days.
         </marquee>
     )}
    
@@ -52,7 +52,7 @@ export default function AllFoundAnnouncements() {
 
       <div className="grid md:grid-cols-3 sm:grid-cols-2 grid-cols-1 gap-10 mt-6">
         {!loading &&
-          foundItems.map((item) => (
+          foundItems.map((item) => item.isVerified && !item.isResolved &&  (
             <motion.div
               key={item._id}
               initial={{ opacity: 0, y: 40 }}
