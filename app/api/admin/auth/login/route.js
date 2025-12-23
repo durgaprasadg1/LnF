@@ -8,7 +8,6 @@ export async function POST(req) {
     await dbConnect();
     const { email, password, secret } = await req.json();
 
-    // Validate secret
     if (!process.env.ADMIN_CREATION_SECRET) {
       return NextResponse.json(
         { error: "Server not configured" },
@@ -23,7 +22,6 @@ export async function POST(req) {
       );
     }
 
-    // Validate inputs
     if (!email || !password) {
       return NextResponse.json(
         { error: "Email and password required" },

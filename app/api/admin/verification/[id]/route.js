@@ -4,27 +4,36 @@ import { NextResponse } from "next/server";
 import { deleteImage } from "@/lib/cloudinary";
 
 export async function DELETE(req, { params }) {
-  await dbConnect();
+  try {
+    await dbConnect();
 
-  const { id } = await params;
+    const { id } = await params;
 
-  // Get the item to retrieve the image filename
-  const item = await Item.findById(id);
+    const item = await Item.findById(id);
 
-  if (!item) {
+    if (!item) {
+      return NextResponse.json(
+        { success: false, error: "Item not found" },
+        { status: 404 }
+      );
+    }
+
+    if (item.itemImage?.filename) {
+      await deleteImage(item.itemImage.filename);
+    }
+
+    await Item.findByIdAndDelete(id);
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error("DELETE ITEM ERROR:", error);
+
     return NextResponse.json(
-      { success: false, error: "Item not found" },
-      { status: 404 }
+      {
+        success: false,
+        error: "Internal Server Error",
+      },
+      { status: 500 }
     );
   }
-
-  // Delete image from Cloudinary if it exists
-  if (item.itemImage?.filename) {
-    await deleteImage(item.itemImage.filename);
-  }
-
-  // Delete item from database
-  await Item.findByIdAndDelete(id);
-
-  return NextResponse.json({ success: true });
 }

@@ -12,7 +12,6 @@ export async function PATCH(req, { params }) {
 
     const body = await req.json();
 
-    // Validate request body
     const validationResult = userActionSchema.safeParse(body);
     if (!validationResult.success) {
       return NextResponse.json(
@@ -71,21 +70,17 @@ export async function DELETE(req, { params }) {
     await dbConnect();
     const { id } = await params;
 
-    // Get all items by this user to delete their images from Cloudinary
     const userItems = await Item.find({ postedBy: id });
     const imagePublicIds = userItems
       .filter((item) => item.itemImage?.filename)
       .map((item) => item.itemImage.filename);
 
-    // Delete images from Cloudinary
     if (imagePublicIds.length > 0) {
       await deleteImages(imagePublicIds);
     }
 
-    // Delete items from database
     await Item.deleteMany({ postedBy: id });
 
-    // Delete user
     await User.findByIdAndDelete(id);
 
     return NextResponse.json({

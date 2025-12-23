@@ -7,7 +7,6 @@ export async function GET(req) {
   try {
     await dbConnect();
 
-    // Admin stats endpoint - protected by layout guards
     const totalUsers = await User.countDocuments();
 
     const lostRequests = await Item.countDocuments({ isLost: true });

@@ -53,7 +53,6 @@ export async function POST(req) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create admin
     const admin = await Admin.create({
       name,
       email,

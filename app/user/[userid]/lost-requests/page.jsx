@@ -182,7 +182,7 @@ export default function MyLostRequests() {
                 <button
                   onClick={() => handleGotItem(item._id)}
                   disabled={resolvingItemId === item._id}
-                  className="p-1 mt-3 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]"
+                  className="p-1 mt-3 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-25"
                 >
                   {resolvingItemId === item._id ? (
                     <>
