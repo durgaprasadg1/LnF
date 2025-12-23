@@ -36,7 +36,6 @@ export default function EditProfileModal({ open, setOpen, mongoUser }) {
   async function submit() {
     if (!user) return;
 
-    // Validation using regex
     const nameRegex = /^[A-Za-z\s]{2,100}$/;
     const phoneRegex = /^[0-9+\-\s]{7,20}$/;
     const bioRegex = /^.{0,500}$/s;
@@ -80,7 +79,7 @@ export default function EditProfileModal({ open, setOpen, mongoUser }) {
     });
 
     setOpen(false);
-    window.location.reload();
+    
   }
 
   return (

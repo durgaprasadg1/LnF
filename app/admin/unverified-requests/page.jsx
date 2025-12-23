@@ -16,6 +16,7 @@ export default function VerificationPage() {
   const [items, setItems] = useState([]);
   const [imageOpen, setImageOpen] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null);
 
   const fetchItems = async () => {
     try {
@@ -33,122 +34,140 @@ export default function VerificationPage() {
 
   const handleVerify = async (id) => {
     try {
-      await fetch(`/api/admin/verification/${id}/verify`, {
+      setActionLoading({ id, action: "verify" });
+      const res = await fetch(`/api/admin/verification/${id}/verify`, {
         method: "PATCH",
       });
+
+      if (!res.ok) throw new Error("Verification failed");
+
       toast.success("Request verified");
       fetchItems();
-    } catch {
-      toast.error("Verification failed");
+    } catch (error) {
+      toast.error(error.message || "Verification failed");
+    } finally {
+      setActionLoading(null);
     }
   };
 
   const handleReject = async (id) => {
     if (!confirm("Reject and delete this request?")) return;
     try {
-      await fetch(`/api/admin/verification/${id}`, {
+      setActionLoading({ id, action: "reject" });
+      const res = await fetch(`/api/admin/verification/${id}`, {
         method: "DELETE",
       });
+
+      if (!res.ok) throw new Error("Rejection failed");
+
       toast.success("Request rejected");
       fetchItems();
-    } catch {
-      toast.error("Rejection failed");
+    } catch (error) {
+      toast.error(error.message || "Rejection failed");
+    } finally {
+      setActionLoading(null);
     }
   };
 
- const columns = [
-  {
-    header: "Item Name",
-    accessorKey: "itemName",
-    cell: ({ getValue }) => (
-      <span className="font-semibold">{getValue() || "—"}</span>
-    ),
-  },
-  {
-    header: "Category",
-    accessorKey: "category",
-    cell: ({ getValue }) => (
-      <span className="text-sm text-gray-300">{getValue()}</span>
-    ),
-  },
-  {
-    header: "Type",
-    cell: ({ row }) => (
-      <span
-        className={`px-2 py-1 text-xs rounded-md ${
-          row.original.isLost
-            ? "bg-red-500/20 text-red-400"
-            : "bg-green-500/20 text-green-400"
-        }`}
-      >
-        {row.original.isLost ? "Lost" : "Found"}
-      </span>
-    ),
-  },
-  {
-    header: "Description",
-    accessorKey: "description",
-    cell: ({ getValue }) => (
-      <p className="max-w-xs line-clamp-2 text-sm text-gray-300">
-        {getValue() || "—"}
-      </p>
-    ),
-  },
-  {
-    header: "Posted By",
-    accessorFn: (row) => row.postedBy?.name || "—",
-  },
-  {
-    header: "Email",
-    accessorFn: (row) => row.postedBy?.email || "—",
-  },
-  {
-    header: "Phone",
-    accessorFn: (row) => row.postedBy?.phone || "—",
-  },
-  {
-    header: "Image",
-    cell: ({ row }) =>
-      row.original.itemImage?.url ? (
-        <Button
-          size="sm"
-          variant="outline"
-          className="bg-transparent text-white"
-          onClick={() => {
-            setSelectedImage(row.original.itemImage.url);
-            setImageOpen(true);
-          }}
-        >
-          View
-        </Button>
-      ) : (
-        <span className="text-gray-400">N/A</span>
+  const columns = [
+    {
+      header: "Item Name",
+      accessorKey: "itemName",
+      cell: ({ getValue }) => (
+        <span className="font-semibold">{getValue() || "—"}</span>
       ),
-  },
-  {
-    header: "Actions",
-    cell: ({ row }) => (
-      <div className="flex flex-col sm:flex-row gap-2">
-        <Button
-          size="sm"
-          className="bg-green-600 text-white"
-          onClick={() => handleVerify(row.original._id)}
+    },
+    {
+      header: "Category",
+      accessorKey: "category",
+      cell: ({ getValue }) => (
+        <span className="text-sm text-gray-300">{getValue()}</span>
+      ),
+    },
+    {
+      header: "Type",
+      cell: ({ row }) => (
+        <span
+          className={`px-2 py-1 text-xs rounded-md ${
+            row.original.isLost
+              ? "bg-red-500/20 text-red-400"
+              : "bg-green-500/20 text-green-400"
+          }`}
         >
-          Verify
-        </Button>
-        <Button
-          size="sm"
-          variant="destructive"
-          onClick={() => handleReject(row.original._id)}
-        >
-          Reject
-        </Button>
-      </div>
-    ),
-  },
-];
-
-
+          {row.original.isLost ? "Lost" : "Found"}
+        </span>
+      ),
+    },
+    {
+      header: "Description",
+      accessorKey: "description",
+      cell: ({ getValue }) => (
+        <p className="max-w-xs line-clamp-2 text-sm text-gray-300">
+          {getValue() || "—"}
+        </p>
+      ),
+    },
+    {
+      header: "Posted By",
+      accessorFn: (row) => row.postedBy?.name || "—",
+    },
+    {
+      header: "Email",
+      accessorFn: (row) => row.postedBy?.email || "—",
+    },
+    {
+      header: "Phone",
+      accessorFn: (row) => row.postedBy?.phone || "—",
+    },
+    {
+      header: "Image",
+      cell: ({ row }) =>
+        row.original.itemImage?.url ? (
+          <Button
+            size="sm"
+            variant="outline"
+            className="bg-transparent text-white"
+            onClick={() => {
+              setSelectedImage(row.original.itemImage.url);
+              setImageOpen(true);
+            }}
+          >
+            View
+          </Button>
+        ) : (
+          <span className="text-gray-400">N/A</span>
+        ),
+    },
+    {
+      header: "Actions",
+      cell: ({ row }) => (
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Button
+            size="sm"
+            className="bg-green-600 text-white disabled:opacity-50"
+            onClick={() => handleVerify(row.original._id)}
+            disabled={actionLoading?.id === row.original._id}
+          >
+            {actionLoading?.id === row.original._id &&
+            actionLoading?.action === "verify"
+              ? "Verifying..."
+              : "Verify"}
+          </Button>
+          <Button
+            size="sm"
+            variant="destructive"
+            onClick={() => handleReject(row.original._id)}
+            disabled={actionLoading?.id === row.original._id}
+          >
+            {actionLoading?.id === row.original._id &&
+            actionLoading?.action === "reject"
+              ? "Rejecting..."
+              : "Reject"}
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-900 via-gray-900 to-black p-4 sm:p-6 text-white">

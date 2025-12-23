@@ -4,6 +4,7 @@ import User from "@/model/user";
 import cloudinary from "@/lib/cloudinary";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
+import { foundItemSchema } from "@/lib/validationSchemas";
 
 export async function POST(req, { params }) {
   await dbConnect();
@@ -23,6 +24,15 @@ export async function POST(req, { params }) {
 
   if (mongoUser.email !== decoded.email)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  // Validate request body
+  const validationResult = foundItemSchema.safeParse(body);
+  if (!validationResult.success) {
+    return NextResponse.json(
+      { error: validationResult.error.errors[0].message },
+      { status: 400 }
+    );
+  }
 
   let imageData = null;
 

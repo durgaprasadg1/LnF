@@ -2,13 +2,26 @@ import dbConnect from "@/lib/dbConnect";
 import User from "@/model/user";
 import Item from "@/model/item";
 import { NextResponse } from "next/server";
+import { deleteImages } from "@/lib/cloudinary";
+import { userActionSchema } from "@/lib/validationSchemas";
 
 export async function PATCH(req, { params }) {
   try {
     await dbConnect();
     const { id } = await params;
 
-    const { action } = await req.json();
+    const body = await req.json();
+
+    // Validate request body
+    const validationResult = userActionSchema.safeParse(body);
+    if (!validationResult.success) {
+      return NextResponse.json(
+        { success: false, error: validationResult.error.errors[0].message },
+        { status: 400 }
+      );
+    }
+
+    const { action } = validationResult.data;
 
     const user = await User.findById(id);
     if (!user) {
@@ -58,8 +71,21 @@ export async function DELETE(req, { params }) {
     await dbConnect();
     const { id } = await params;
 
+    // Get all items by this user to delete their images from Cloudinary
+    const userItems = await Item.find({ postedBy: id });
+    const imagePublicIds = userItems
+      .filter((item) => item.itemImage?.filename)
+      .map((item) => item.itemImage.filename);
+
+    // Delete images from Cloudinary
+    if (imagePublicIds.length > 0) {
+      await deleteImages(imagePublicIds);
+    }
+
+    // Delete items from database
     await Item.deleteMany({ postedBy: id });
 
+    // Delete user
     await User.findByIdAndDelete(id);
 
     return NextResponse.json({

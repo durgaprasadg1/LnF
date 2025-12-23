@@ -19,6 +19,7 @@ import {
 export default function AllLostRequests() {
   const [lostItems, setLostItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [markingFoundId, setMarkingFoundId] = useState(null);
   const { user, mongoUser, refreshMongoUser } = useAuth();
   useEffect(() => {
     async function fetchItems() {
@@ -36,42 +37,48 @@ export default function AllLostRequests() {
     fetchItems();
   }, []);
 
-const handleMarkFound = async (itemId) => {
-  try {
-    if(!confirm("Are you sure to mark this item as found? Your all details will be shared with the owner.")){
-      return;
+  const handleMarkFound = async (itemId) => {
+    try {
+      if (
+        !confirm(
+          "Are you sure to mark this item as found? Your all details will be shared with the owner."
+        )
+      ) {
+        return;
+      }
+
+      if (!user) {
+        alert("You must be logged in!");
+        return;
+      }
+
+      setMarkingFoundId(itemId);
+      const token = await user.getIdToken();
+
+      const res = await fetch(`/api/items/${itemId}/found`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || "Something went wrong");
+      }
+
+      console.log("Item marked as found:", data);
+      alert("Item marked as found!");
+    } catch (error) {
+      console.error("Error marking item found:", error.message);
+      alert(error.message || "Failed to mark as found");
+    } finally {
+      setMarkingFoundId(null);
+      refreshMongoUser();
     }
-
-    if (!user) {
-      alert("You must be logged in!");
-      return;
-    }
-
-    const token = await user.getIdToken();
-
-    const res = await fetch(`/api/items/${itemId}/found`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      throw new Error(data.error || "Something went wrong");
-    }
-
-    console.log("Item marked as found:", data);
-    alert("Item marked as found!");
-  } catch (error) {
-    console.error("Error marking item found:", error.message);
-    alert(error.message || "Failed to mark as found");
-  }
-  
-  refreshMongoUser();
-};
+  };
 
   return (
     <>
@@ -81,7 +88,8 @@ const handleMarkFound = async (itemId) => {
           direction="left"
           className="text-stone-800 font-semibold mt-2"
         >
-          Your lost item request will be listed once admin verifies. The item from the listing will be deleted automatically after 10 days.
+          Your lost item request will be listed once admin verifies. The item
+          from the listing will be deleted automatically after 10 days.
         </marquee>
       )}
 
@@ -104,7 +112,8 @@ const handleMarkFound = async (itemId) => {
           {!loading &&
             lostItems.map(
               (item) =>
-                item.isVerified && !item.isResolved && (
+                item.isVerified &&
+                !item.isResolved && (
                   <motion.div
                     key={item._id}
                     initial={{ opacity: 0, y: 40 }}
@@ -190,10 +199,22 @@ const handleMarkFound = async (itemId) => {
 
                             <Button
                               variant="outline"
-                              className="bg-green-600 text-white"
-                              onClick={() => {handleMarkFound(item._id)}}
-                            disabled={item.isFound}>
-                              Mark Found
+                              className="bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+                              onClick={() => {
+                                handleMarkFound(item._id);
+                              }}
+                              disabled={
+                                item.isFound || markingFoundId === item._id
+                              }
+                            >
+                              {markingFoundId === item._id ? (
+                                <>
+                                  <Loader2 className="animate-spin h-4 w-4 mr-2" />
+                                  Processing...
+                                </>
+                              ) : (
+                                "Mark Found"
+                              )}
                             </Button>
                           </div>
                         ) : (

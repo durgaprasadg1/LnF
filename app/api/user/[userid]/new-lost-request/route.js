@@ -4,6 +4,7 @@ import User from "@/model/user";
 import cloudinary from "@/lib/cloudinary";
 import { adminAuth } from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
+import { lostItemSchema } from "@/lib/validationSchemas";
 
 export async function POST(req, { params }) {
   await dbConnect();
@@ -12,22 +13,33 @@ export async function POST(req, { params }) {
   const body = await req.json();
 
   const token = req.headers.get("Authorization")?.split(" ")[1];
-  if (!token) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!token)
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const decoded = await adminAuth.verifyIdToken(token);
 
   const mongoUser = await User.findById(userid);
-  if (!mongoUser) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  if (!mongoUser)
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   if (mongoUser.email !== decoded.email)
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+
+  // Validate request body
+  const validationResult = lostItemSchema.safeParse(body);
+  if (!validationResult.success) {
+    return NextResponse.json(
+      { error: validationResult.error.errors[0].message },
+      { status: 400 }
+    );
+  }
 
   let imageData = null;
 
   if (body.itemImage) {
     if (
       !body.itemImage.startsWith("data:image/png") &&
-      !body.itemImage.startsWith("data:image/jpeg") 
+      !body.itemImage.startsWith("data:image/jpeg")
     ) {
       return NextResponse.json(
         { error: "Only PNG and JPG images are allowed" },
@@ -35,7 +47,8 @@ export async function POST(req, { params }) {
       );
     }
 
-    const base64Length = body.itemImage.length - (body.itemImage.indexOf(",") + 1);
+    const base64Length =
+      body.itemImage.length - (body.itemImage.indexOf(",") + 1);
     const sizeInBytes = (base64Length * 3) / 4;
 
     if (sizeInBytes > 2 * 1024 * 1024) {
@@ -65,9 +78,9 @@ export async function POST(req, { params }) {
     itemImage: imageData,
     reportedAt: new Date(),
   });
-    await User.findByIdAndUpdate(userid, {
-    $inc: { totalLostRequests: 1 }
-    });
+  await User.findByIdAndUpdate(userid, {
+    $inc: { totalLostRequests: 1 },
+  });
 
   return NextResponse.json({ success: true, item: newItem });
 }

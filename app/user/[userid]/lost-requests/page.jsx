@@ -13,48 +13,55 @@ import Image from "next/image";
 
 export default function MyLostRequests() {
   const { userid } = useParams();
-  const { user , refreshMongoUser} = useAuth();
+  const { user, refreshMongoUser } = useAuth();
 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [resolvingItemId, setResolvingItemId] = useState(null);
 
-const handleGotItem = async (itemId) => {
-  try {
-    if(!confirm("Are you sure to mark this item as found? Your all details will be shared with the owner.")){
-      return;
-    }
+  const handleGotItem = async (itemId) => {
+    try {
+      if (
+        !confirm(
+          "Are you sure to mark this item as found? Your all details will be shared with the owner."
+        )
+      ) {
+        return;
+      }
 
-    if (!user) {
-      alert("You must be logged in!");
-      return;
-    }
+      if (!user) {
+        alert("You must be logged in!");
+        return;
+      }
 
-    const token = await user.getIdToken();
+      setResolvingItemId(itemId);
+      const token = await user.getIdToken();
 
-    const res = await fetch(`/api/items/${itemId}/resolved`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + token,
-      },
-    });
+      const res = await fetch(`/api/items/${itemId}/resolved`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token,
+        },
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
+      if (!res.ok) {
+        toast.error("Failed to mark as resolved");
+        console.log(data.error || "Something went wrong");
+      } else {
+        console.log("Item marked as resolved:", data);
+        toast.success("Item marked as resolved!");
+      }
+    } catch (error) {
+      console.error("Error marking item resolved:", error.message);
       toast.error("Failed to mark as resolved");
-      console.log(data.error || "Something went wrong");
+    } finally {
+      setResolvingItemId(null);
+      refreshMongoUser();
     }
-
-    console.log("Item marked as resolved:", data);
-    toast.success("Item marked as resolved!");
-  } catch (error) {
-    console.error("Error marking item resolved:", error.message);
-    toast.error("Failed to mark as resolved");
-  }
-  
-  refreshMongoUser();
-};
+  };
 
   useEffect(() => {
     if (!user) return;
@@ -159,23 +166,53 @@ const handleGotItem = async (itemId) => {
               <div>
                 <h3 className="text-lg font-semibold">{item.itemName}</h3>
                 <p className="text-gray-600">Lost at: {item.lostAt || "N/A"}</p>
-               <span
-                    className={`inline-block mt-2 px-3 py-1 text-sm rounded-md mr-5 ${
-                      item.isResolved
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {item.isFound ? "Found" : item.isResolved ? "Resolved" : "Pending"}
-                  </span>
-                  <button
-                    onClick={() => handleGotItem(item._id)}
-                    className="p-1 mt-3 bg-green-600 text-white rounded hover:bg-green-700"
-                  >
-                    Got Item
-                  </button>
-                </div>
-              
+                <span
+                  className={`inline-block mt-2 px-3 py-1 text-sm rounded-md mr-5 ${
+                    item.isResolved
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {item.isFound
+                    ? "Found"
+                    : item.isResolved
+                    ? "Resolved"
+                    : "Pending"}
+                </span>
+                <button
+                  onClick={() => handleGotItem(item._id)}
+                  disabled={resolvingItemId === item._id}
+                  className="p-1 mt-3 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center min-w-[100px]"
+                >
+                  {resolvingItemId === item._id ? (
+                    <>
+                      <svg
+                        className="animate-spin h-4 w-4 mr-2"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Processing...
+                    </>
+                  ) : (
+                    "Got Item"
+                  )}
+                </button>
+              </div>
             </motion.div>
           ))}
         </div>
