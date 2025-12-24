@@ -3,20 +3,21 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Navbar from "../Components/Others/Navbar";
+import AccountBlockedBox from "../Components/Others/AccountBlockedBox";
 
 export default function UserLayout({ children }) {
-  const { user, admin } = useAuth();
+  const { user, admin , mongoUser} = useAuth();
   const router = useRouter();
-
+  if(mongoUser?.isBlocked){
+        return <AccountBlockedBox/>;
+      }
   useEffect(() => {
-    // Check if admin is logged in, redirect to admin
     const adminSession = localStorage.getItem("adminSession");
     if (adminSession) {
       router.push("/admin");
       return;
     }
 
-    // Check if regular user is logged in
     if (!user) {
       router.push("/login");
       return;

@@ -3,8 +3,9 @@ import { useEffect, useState } from "react";
 import DataTable from "../../Components/Others/Datatables";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-toastify";
-
+import { useAuth } from "@/context/AuthContext";
 export default function AdminUsersPage() {
+  const { mongoUser } = useAuth();
   const [users, setUsers] = useState([]);
   const [actionLoading, setActionLoading] = useState(null);
   const fetchUsers = async () => {
@@ -47,8 +48,11 @@ export default function AdminUsersPage() {
       });
 
       if (!res.ok) throw new Error("Failed to block user");
-
-      toast.success("User has been blocked");
+      if (mongoUser?.isBlocked) {
+        toast.error("User has been blocked");
+        return;
+      }
+      toast.success("User has been unblocked");
       fetchUsers();
     } catch (error) {
       console.error(error);
@@ -113,12 +117,10 @@ export default function AdminUsersPage() {
               variant="outline"
               onClick={() => handleBlock(user._id)}
               disabled={actionLoading?.id === user._id}
-              className="bg-yellow-500 hover:bg-yellow-600 border-0 hover:text-white disabled:opacity-50"
+              className={user.isBlocked ? "bg-green-600 hover:bg-green-700 border-0 hover:text-white disabled:opacity-50" : "bg-yellow-500 hover:bg-yellow-600 border-0 hover:text-white disabled:opacity-50"}
             >
-              {actionLoading?.id === user._id &&
-              actionLoading?.action === "block"
-                ? "Blocking..."
-                : "Block"}
+              
+              {user.isBlocked ? "Unblock" : "Block"}
             </Button>
             <Button
               size="sm"

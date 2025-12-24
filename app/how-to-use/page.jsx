@@ -105,7 +105,7 @@ export default function HowToUsePage() {
             Help reunite people with their belongings.
           </p>
           <Link href="/">
-            <Button className="mt-4 bg-gray-800 text-white hover:bg-black">
+            <Button className="mt-4 bg-gray-800 text-white hover:bg-black mb-72">
               Go to Home
             </Button>
           </Link>
