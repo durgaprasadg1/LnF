@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import UnauthorizedBox from "@/app/Components/Others/UnAuthorised";
+import { Loader2 } from "lucide-react";
 
 export default function NewLostRequest() {
   const { user, mongoUser } = useAuth();
@@ -125,6 +126,9 @@ export default function NewLostRequest() {
         <UnauthorizedBox />
       </div>
     );
+  }
+  if(loading){
+    return <div className="min-h-screen"> <Loader2 /></div>
   }
 
   return (
