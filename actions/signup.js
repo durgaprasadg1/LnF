@@ -1,4 +1,4 @@
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signOut } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { toast } from "react-toastify";
 import { getAuthErrorMessage } from "@/lib/authErrors";
@@ -10,10 +10,19 @@ export async function signup(email, password) {
 
     const res = await fetch("/api/auth/sync", {
       method: "POST",
-      body: JSON.stringify({ idToken: token }),
+      body: JSON.stringify({ idToken: token, create: true }),
     });
 
     const data = await res.json();
+
+    if (!res.ok) {
+      try {
+        await signOut(auth);
+      } catch {}
+      toast.error(data?.error || "Signup failed");
+      console.log(data?.error || "Signup failed");
+    }
+
     toast.success("Account created successfully");
     return data;
   } catch (err) {

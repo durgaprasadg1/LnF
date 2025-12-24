@@ -255,8 +255,9 @@ export default function Navbar() {
                   </>
                 ) : (
                   <>
+                  <div className="flex items-center justify-around gap-2"> 
                     <BellIcon
-                      className="cursor-pointer"
+                      className="cursor-pointer ml-5"
                       onClick={() => setNotifyOpen(true)}
                     />
 
@@ -267,10 +268,11 @@ export default function Navbar() {
                     )}
 
                     <Link href={`/user/${mongoUserId}`}>
-                      <Button variant="outline" className="mb-2">
+                      <Button variant="outline" className="mb-2 ml-5">
                         {mongoUser?.name?.split(" ")[0] || "Profile"}
                       </Button>
                     </Link>
+                    </div>
 
                     <Button
                       onClick={handleLogout}

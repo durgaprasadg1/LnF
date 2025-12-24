@@ -102,7 +102,7 @@ export default function LoginPage() {
               hover:bg-stone-800 hover:text-white"
           >
             <FcGoogle />
-            Continue with Google
+            Sign In with Google
           </Button>
 
           <p className="mt-6 text-center text-sm text-gray-600">

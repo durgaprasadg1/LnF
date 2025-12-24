@@ -51,10 +51,10 @@ export default function SignupPage() {
   async function handleGoogleSignup() {
     setLoading(true);
     try {
-      await googleSignin();
+      await googleSignin({ create: true });
       router.push("/");
     } catch {
-      toast.error("Google signup failed");
+     console.error("Google signup error");
     } finally {
       setLoading(false);
     }
@@ -104,7 +104,8 @@ export default function SignupPage() {
               hover:bg-gray-800 hover:text-white"
           >
             <FcGoogle size={20} />
-            Continue with Google
+            Sign In with Google
+            
           </Button>
 
           <p className="mt-6 text-sm text-center text-gray-600">
