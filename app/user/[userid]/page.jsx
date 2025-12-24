@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import EditProfileModal from "../../Components/User/EditProfileModal";
 import { motion } from "framer-motion";
@@ -9,17 +9,26 @@ import StatCard from "../../Components/User/StatCard";
 import QuickActions from "../../Components/User/QuickActions";
 import AchievementBanner from "../../Components/User/AchievementBanner";
 import { Loader2 } from "lucide-react";
+
 export default function ProfilePage() {
-  const { user, mongoUser } = useAuth();
-  console.log("Mongo User in Profile Page: ", mongoUser);
+  const { user, mongoUser, refreshMongoUser } = useAuth();
   const [open, setOpen] = useState(false);
 
-  if (!user || !mongoUser)
+  useEffect(() => {
+    if (!user) return;
+    const interval = setInterval(() => {
+      refreshMongoUser();
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [user, refreshMongoUser]);
+
+  if (!user || !mongoUser) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="animate-spin h-10 w-10 text-gray-800" />
       </div>
     );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
@@ -31,7 +40,7 @@ export default function ProfilePage() {
         <Image
           src={
             mongoUser.profilePicture?.url ||
-            user.photoURL?.url ||
+            user.photoURL ||
             "/default-user.png"
           }
           alt="Profile"
@@ -44,7 +53,7 @@ export default function ProfilePage() {
           <h2 className="text-2xl font-semibold">{mongoUser.name}</h2>
           <p className="text-sm opacity-90">{mongoUser.email}</p>
           <p className="capitalize text-sm mt-1">{mongoUser.role}</p>
-          <p className="capitalize text-sm text-white">{mongoUser.phone}</p>
+          <p className="capitalize text-sm">{mongoUser.phone}</p>
         </div>
 
         <div className="flex-1" />
@@ -56,17 +65,18 @@ export default function ProfilePage() {
           Edit Profile
         </button>
       </motion.div>
+
       {mongoUser.bio && (
         <motion.p
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mt-6 text-center text-gray-700 italic bg-stone-200 py-3 rounded-2xl"
-
         >
           {mongoUser.bio}
         </motion.p>
       )}
-      <div className="grid md:grid-cols-2 grid-cols-1 gap-6 mt-10 ">
+
+      <div className="grid md:grid-cols-2 grid-cols-1 gap-6 mt-10">
         <StatCard
           title="Lost Requests"
           value={mongoUser.totalLostRequests || 0}
@@ -76,11 +86,13 @@ export default function ProfilePage() {
           value={mongoUser.itemsReturned || 0}
         />
       </div>
+
       <QuickActions mongoUser={mongoUser} />
       <AchievementBanner count={mongoUser.itemsReturned} />
+
       {open && (
         <EditProfileModal open={open} setOpen={setOpen} mongoUser={mongoUser} />
-      )}{" "}
+      )}
     </div>
   );
 }

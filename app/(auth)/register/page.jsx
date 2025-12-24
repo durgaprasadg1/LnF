@@ -104,7 +104,7 @@ export default function SignupPage() {
               hover:bg-gray-800 hover:text-white"
           >
             <FcGoogle size={20} />
-            Sign In with Google
+            Sign Up with Google
             
           </Button>
 
