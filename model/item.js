@@ -59,7 +59,6 @@ const itemSchema = new Schema(
       ref: "User",
       required: true,
     },
-    
 
     reportedAt: {
       type: Date,
@@ -84,5 +83,21 @@ const itemSchema = new Schema(
 );
 
 itemSchema.index({ reportedAt: 1 }, { expireAfterSeconds: 864000 });
+itemSchema.index({ postedBy: 1 });
+itemSchema.index({ isResolved: 1 });
+itemSchema.index({ isVerified: 1 });
+itemSchema.index({ category: 1 });
+itemSchema.index({ isLost: 1, isFound: 1 });
+
+itemSchema.post("findByIdAndDelete", async function (doc) {
+  if (doc) {
+    const User = mongoose.model("User");
+    await User.findByIdAndUpdate(
+      doc.postedBy,
+      { $pull: { items: doc._id } },
+      { new: true }
+    );
+  }
+});
 
 export default mongoose.models.Item || mongoose.model("Item", itemSchema);

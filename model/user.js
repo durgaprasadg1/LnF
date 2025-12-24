@@ -88,19 +88,41 @@ const userSchema = new Schema(
       type: String,
       default: "#f3f4f6",
     },
-    notification : [{
-        type : String,
-    }],
-    isBlocked : {
-      type : Boolean,
-      default : false,
+    notification: [
+      {
+        type: String,
+      },
+    ],
+    isBlocked: {
+      type: Boolean,
+      default: false,
     },
-    isUser : {
-      type : Boolean,
-      default : true,
-    }
+    isUser: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
+);
+
+userSchema.index({ role: 1 });
+userSchema.index({ department: 1 });
+userSchema.index({ isBlocked: 1 });
+
+userSchema.post("findByIdAndDelete", async function (doc) {
+  if (doc) {
+    const Item = mongoose.model("Item");
+    await Item.deleteMany({ postedBy: doc._id });
+  }
+});
+
+userSchema.pre(
+  "deleteOne",
+  { document: true, query: false },
+  async function () {
+    const Item = mongoose.model("Item");
+    await Item.deleteMany({ postedBy: this._id });
+  }
 );
 
 export default mongoose.models.User || mongoose.model("User", userSchema);

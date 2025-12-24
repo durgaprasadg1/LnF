@@ -29,7 +29,6 @@ export default function Navbar() {
   const router = useRouter();
   const { user, mongoUser } = useAuth();
   const { refreshMongoUser } = useAuth();
-  console.log("Mongo User Notification", mongoUser?.notification);
 
   const [notifyOpen, setNotifyOpen] = useState(false);
   const mongoUserId = mongoUser?._id;

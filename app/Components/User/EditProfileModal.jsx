@@ -1,5 +1,11 @@
 "use client";
 
+import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { toast } from "react-toastify";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 import {
   Dialog,
   DialogContent,
@@ -12,74 +18,90 @@ import {
   SelectContent,
   SelectGroup,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 
-import { useState } from "react";
-import { useAuth } from "@/context/AuthContext";
 import { Input } from "@/components/ui/input";
-import { toast } from "react-hot-toast";
 
 export default function EditProfileModal({ open, setOpen, mongoUser }) {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
+  const router = useRouter();
 
+  const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({
-    name: mongoUser.name,
-    phone: mongoUser.phone || "",
-    department: mongoUser.department,
-    position: mongoUser.position,
-    bio: mongoUser.bio || "",
+    name: mongoUser?.name || "",
+    phone: mongoUser?.phone || "",
+    department: mongoUser?.department || "",
+    position: mongoUser?.position || "",
+    bio: mongoUser?.bio || "",
   });
 
   async function submit() {
     if (!user) return;
 
-    const nameRegex = /^[A-Za-z\s]{2,100}$/;
-    const phoneRegex = /^[0-9+\-\s]{7,20}$/;
-    const bioRegex = /^.{0,500}$/s;
-    const allowedDeps = [
-      "Computer Engineering",
-      "Electrical Engineering",
-      "Mechanical Engineering",
-      "Civil Engineering",
-      "Non-teaching Staff",
-      "Teaching Staff",
-      "Library Staff",
-      "Other",
-    ];
+    setSaving(true);
 
-    if (!form.name || !nameRegex.test(form.name)) {
-      toast.error("Enter a valid name (letters and spaces only)");
-      return;
-    }
-    if (form.phone && !phoneRegex.test(form.phone)) {
-      toast.error("Enter a valid phone number");
-      return;
-    }
-    if (form.department && !allowedDeps.includes(form.department)) {
-      toast.error("Select a valid department");
-      return;
-    }
-    if (form.bio && !bioRegex.test(form.bio)) {
-      toast.error("Bio must be 500 characters or less");
-      return;
-    }
+    try {
+      const nameRegex = /^[A-Za-z\s]{2,100}$/;
+      const phoneRegex = /^[0-9+\-\s]{7,20}$/;
+      const bioRegex = /^.{0,500}$/s;
 
-    const token = await user.getIdToken(true);
+      const allowedDeps = [
+        "Computer Engineering",
+        "Electrical Engineering",
+        "Mechanical Engineering",
+        "Civil Engineering",
+        "Non-teaching Staff",
+        "Teaching Staff",
+        "Library Staff",
+        "Other",
+      ];
 
-    const res = await fetch(`/api/user/${mongoUser._id}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(form),
-    });
+      if (!form.name || !nameRegex.test(form.name)) {
+        toast.error("Enter a valid name");
+        return;
+      }
 
-    setOpen(false);
-    
+      if (form.phone && !phoneRegex.test(form.phone)) {
+        toast.error("Enter a valid phone number");
+        return;
+      }
+
+      if (form.department && !allowedDeps.includes(form.department)) {
+        toast.error("Select a valid department");
+        return;
+      }
+
+      if (form.bio && !bioRegex.test(form.bio)) {
+        toast.error("Bio must be 500 characters or less");
+        return;
+      }
+
+      const token = await user.getIdToken(true);
+
+      const res = await fetch(`/api/user/${mongoUser._id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        toast.error("Failed to update profile");
+        return;
+      }
+      router.refresh();
+      toast.success("Profile updated successfully");
+      setOpen(false);
+    } catch (err) {
+      toast.error("Something went wrong");
+      console.error("Error updating profile:", err);
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -93,20 +115,16 @@ export default function EditProfileModal({ open, setOpen, mongoUser }) {
           <div className="space-y-1">
             <label className="text-sm">Name</label>
             <Input
-              type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full border rounded-md p-2"
             />
           </div>
 
           <div className="space-y-1">
             <label className="text-sm">Phone</label>
             <Input
-              type="text"
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              className="w-full border rounded-md p-2"
             />
           </div>
 
@@ -116,29 +134,25 @@ export default function EditProfileModal({ open, setOpen, mongoUser }) {
               value={form.department}
               onValueChange={(value) => setForm({ ...form, department: value })}
             >
-              <SelectTrigger className="w-45">
-                <SelectValue placeholder="Select a fruit" />
+              <SelectTrigger>
+                <SelectValue placeholder="Select department" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  <SelectItem value="Computer Engineering">
-                    Computer Engineering
-                  </SelectItem>
-                  <SelectItem value="Electrical Engineering">
-                    Electrical Engineering
-                  </SelectItem>
-                  <SelectItem value="Mechanical Engineering">
-                    Mechanical Engineering
-                  </SelectItem>
-                  <SelectItem value="Civil Engineering">
-                    Civil Engineering
-                  </SelectItem>
-                  <SelectItem value="Non-teaching Staff">
-                    Non-teaching Staff
-                  </SelectItem>
-                  <SelectItem value="Teaching Staff">Teaching Staff</SelectItem>
-                  <SelectItem value="Library Staff">Library Staff</SelectItem>
-                  <SelectItem value="Other">Other</SelectItem>
+                  {[
+                    "Computer Engineering",
+                    "Electrical Engineering",
+                    "Mechanical Engineering",
+                    "Civil Engineering",
+                    "Non-teaching Staff",
+                    "Teaching Staff",
+                    "Library Staff",
+                    "Other",
+                  ].map((dep) => (
+                    <SelectItem key={dep} value={dep}>
+                      {dep}
+                    </SelectItem>
+                  ))}
                 </SelectGroup>
               </SelectContent>
             </Select>
@@ -151,15 +165,19 @@ export default function EditProfileModal({ open, setOpen, mongoUser }) {
               value={form.bio}
               onChange={(e) => setForm({ ...form, bio: e.target.value })}
               className="w-full border rounded-md p-2"
-            ></textarea>
+            />
           </div>
 
           <button
             type="button"
             onClick={submit}
-            className="bg-stone-800 text-white w-full py-2 rounded-md"
+            disabled={saving}
+            className="bg-stone-800 text-white w-full py-2 rounded-md
+                       flex items-center justify-center gap-2
+                       disabled:opacity-60"
           >
-            Save Changes
+            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </form>
       </DialogContent>

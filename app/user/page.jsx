@@ -8,7 +8,12 @@ export default function UserHomePage() {
   const { user, mongoUser } = useAuth();
 
   return (
+    <>
+     {mongoUser?.phone === "" && <marquee behavior="scroll" direction="left">  Please{" "}
+              <span className="font-semibold">Complete your Profile</span> to
+              get the best experience.</marquee> }
     <div className="min-h-screen bg-linear-to-br from-slate-50 to-gray-100 px-4 sm:px-8 py-16">
+     
       <div className="max-w-6xl mx-auto">
         <section className="text-center max-w-4xl mx-auto">
           <h1 className="text-3xl sm:text-5xl font-bold text-gray-900 leading-tight">
@@ -83,6 +88,7 @@ export default function UserHomePage() {
         </section>
       </div>
     </div>
+    </>
   );
 }
 

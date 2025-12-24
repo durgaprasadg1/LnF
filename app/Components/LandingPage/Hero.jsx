@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
+import { User } from "lucide-react";
 export default function Hero() {
   const { mongoUser } = useAuth();
 
@@ -22,6 +23,7 @@ export default function Hero() {
               <h1 className="mt-2 text-black font-extrabold text-4xl mb-2">
                 Welcome back, {mongoUser.name.split(" ")[0]}!
               </h1>
+            
             </>
           )}
           <h1 className="text-3xl font-bold leading-tight">
@@ -31,12 +33,16 @@ export default function Hero() {
           <p className="mt-4 text-gray-600 text-lg">
             A simple college-wide platform to report, find and recover items
             quickly.
+            <br />
           </p>
-          <div className="flex items-center gap-4 mt-6">
 
-          </div>
+          <div className="flex items-center gap-4 mt-6"></div>
           <Link href="/user" className="mt-3 inline-block ">
-            <Button size="lg" variant="outline" className="bg-gray-800 text-white hover:bg-black hover:text-white hover:cursor-pointer">
+            <Button
+              size="lg"
+              variant="outline"
+              className="bg-gray-800 text-white hover:bg-black hover:text-white hover:cursor-pointer"
+            >
               Get Started
             </Button>
           </Link>

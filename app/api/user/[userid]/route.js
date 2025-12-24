@@ -1,103 +1,86 @@
 import dbConnect from "@/lib/dbConnect";
-import Item from "@/model/item";
 import User from "@/model/user";
-import cloudinary from "@/lib/cloudinary";
-import { adminAuth } from "@/lib/firebaseAdmin";
 import { NextResponse } from "next/server";
-import { foundItemSchema } from "@/lib/validationSchemas";
+import { adminAuth } from "../../../../lib/firebaseAdmin";
 
-export async function POST(req, { params }) {
+export async function PATCH(req, { params }) {
   try {
     await dbConnect();
 
     const { userid } = await params;
-    const body = await req.json();
 
-    const token = req.headers.get("Authorization")?.split(" ")[1];
-    if (!token) {
+    const authHeader = req.headers.get("authorization");
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    let decoded;
-    try {
-      decoded = await adminAuth.verifyIdToken(token);
-    } catch {
-      return NextResponse.json({ error: "Invalid Token" }, { status: 401 });
-    }
+    const token = authHeader.split(" ")[1];
 
-    const mongoUser = await User.findById(userid);
-    if (!mongoUser) {
+    const decoded = await adminAuth.verifyIdToken(token);
+
+    const user = await User.findById(userid);
+    if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (mongoUser.email !== decoded.email) {
+    if (user.email !== decoded.email) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    const validationResult = foundItemSchema.safeParse(body);
-    if (!validationResult.success) {
+    const body = await req.json();
+
+    const nameRegex = /^[A-Za-z\s]{2,100}$/;
+    const phoneRegex = /^[0-9+\-\s]{7,20}$/;
+    const bioRegex = /^.{0,500}$/s;
+
+    const allowedDeps = [
+      "Computer Engineering",
+      "Electrical Engineering",
+      "Mechanical Engineering",
+      "Civil Engineering",
+      "Non-teaching Staff",
+      "Teaching Staff",
+      "Library Staff",
+      "Other",
+    ];
+
+    if (!body.name || !nameRegex.test(body.name)) {
+      return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+    }
+
+    if (body.phone && !phoneRegex.test(body.phone)) {
       return NextResponse.json(
-        { error: validationResult.error.errors[0].message },
+        { error: "Invalid phone number" },
         { status: 400 }
       );
     }
 
-    let imageData = null;
-
-    if (body.itemImage) {
-      if (
-        !body.itemImage.startsWith("data:image/png") &&
-        !body.itemImage.startsWith("data:image/jpeg")
-      ) {
-        return NextResponse.json(
-          { error: "Only PNG and JPG images are allowed" },
-          { status: 400 }
-        );
-      }
-
-      const base64Length =
-        body.itemImage.length - (body.itemImage.indexOf(",") + 1);
-      const sizeInBytes = (base64Length * 3) / 4;
-
-      if (sizeInBytes > 2 * 1024 * 1024) {
-        return NextResponse.json(
-          { error: "Image size must be less than 2MB" },
-          { status: 400 }
-        );
-      }
-
-      const upload = await cloudinary.uploader.upload(body.itemImage, {
-        folder: "lost-and-found/found",
-      });
-
-      imageData = {
-        url: upload.secure_url,
-        filename: upload.public_id,
-      };
+    if (body.department && !allowedDeps.includes(body.department)) {
+      return NextResponse.json(
+        { error: "Invalid department" },
+        { status: 400 }
+      );
     }
 
-    const newItem = await Item.create({
-      itemName: body.itemName,
-      description: body.description,
-      foundAt: body.foundAt,
-      category: body.category,
-      isFound: true,
-      postedBy: mongoUser._id,
-      itemImage: imageData,
-      reportedAt: new Date(),
-    });
+    if (body.bio && !bioRegex.test(body.bio)) {
+      return NextResponse.json({ error: "Bio too long" }, { status: 400 });
+    }
 
-    await User.findByIdAndUpdate(userid, {
-      $inc: { itemsReturned: 1 },
-    });
+    user.name = body.name;
+    user.phone = body.phone || "";
+    user.department = body.department || "";
+    user.bio = body.bio || "";
+
+    await user.save();
 
     return NextResponse.json(
-      { success: true, item: newItem },
-      { status: 201 }
+      { success: true, message: "Profile updated" },
+      { status: 200 }
     );
-  } catch {
+  } catch (error) {
+    console.error("Profile update error:", error);
     return NextResponse.json(
-      { success: false, error: "Internal Server Error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }
