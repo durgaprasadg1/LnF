@@ -1,7 +1,7 @@
 import dbConnect from "@/lib/dbConnect";
 import User from "@/model/user";
 import { NextResponse } from "next/server";
-import { adminAuth } from "../../../../lib/firebaseAdmin";
+import { adminAuth } from "@/lib/firebaseAdmin";
 
 export async function PATCH(req, { params }) {
   try {
@@ -15,7 +15,6 @@ export async function PATCH(req, { params }) {
     }
 
     const token = authHeader.split(" ")[1];
-
     const decoded = await adminAuth.verifyIdToken(token);
 
     const user = await User.findById(userid);
@@ -44,41 +43,58 @@ export async function PATCH(req, { params }) {
       "Other",
     ];
 
-    if (!body.name || !nameRegex.test(body.name)) {
-      return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+    if ("name" in body) {
+      if (!body.name || !nameRegex.test(body.name)) {
+        return NextResponse.json({ error: "Invalid name" }, { status: 400 });
+      }
+      user.name = body.name;
     }
 
-    if (body.phone && !phoneRegex.test(body.phone)) {
-      return NextResponse.json(
-        { error: "Invalid phone number" },
-        { status: 400 }
-      );
+    if ("phone" in body) {
+      if (body.phone && !phoneRegex.test(body.phone)) {
+        return NextResponse.json(
+          { error: "Invalid phone number" },
+          { status: 400 }
+        );
+      }
+      user.phone = body.phone || "";
     }
 
-    if (body.department && !allowedDeps.includes(body.department)) {
-      return NextResponse.json(
-        { error: "Invalid department" },
-        { status: 400 }
-      );
+    if ("department" in body) {
+      if (body.department && !allowedDeps.includes(body.department)) {
+        return NextResponse.json(
+          { error: "Invalid department" },
+          { status: 400 }
+        );
+      }
+      user.department = body.department || "";
     }
 
-    if (body.bio && !bioRegex.test(body.bio)) {
-      return NextResponse.json({ error: "Bio too long" }, { status: 400 });
+    if ("bio" in body) {
+      if (body.bio && !bioRegex.test(body.bio)) {
+        return NextResponse.json(
+          { error: "Bio too long" },
+          { status: 400 }
+        );
+      }
+      user.bio = body.bio || "";
     }
 
-    user.name = body.name;
-    user.phone = body.phone || "";
-    user.department = body.department || "";
-    user.bio = body.bio || "";
+    if ("notification" in body) {
+      if (!Array.isArray(body.notification)) {
+        return NextResponse.json(
+          { error: "Invalid notification format" },
+          { status: 400 }
+        );
+      }
+      user.notification = body.notification;
+    }
 
     await user.save();
 
-    return NextResponse.json(
-      { success: true, message: "Profile updated" },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Profile update error:", error);
+    console.error("User PATCH error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
       { status: 500 }

@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Loader2 } from "lucide-react";
 
 export default function NewFoundAnnouncement({ params }) {
   const { user, mongoUser } = useAuth();
@@ -127,6 +128,10 @@ export default function NewFoundAnnouncement({ params }) {
     }
   }
 
+    if(loading){
+    return(<div className="">
+      <Loader2 className="animate-spin text-3xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+    </div>)}
   return (
     <div className="max-w-xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Report Found Item</h1>
