@@ -39,9 +39,11 @@ export async function googleSignin(options = { create: false }) {
     toast.success("Logged in with Google");
     return data;
   } catch (err) {
-    toast.error("An error occured while signing you with google");
-    console.log(err);
-    const errorMessage = getAuthErrorMessage(err);
-    console.log(errorMessage);
-  }
+    const errorMessage = getAuthErrorMessage(err) || "An error occurred during Google sign-in";
+    toast.error(errorMessage);
+    console.error("Google sign-in error:", err);
+    console.log("Friendly message:", errorMessage);
+    
+}
+
 }
