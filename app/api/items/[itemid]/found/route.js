@@ -10,9 +10,7 @@ export async function PATCH(req, { params }) {
 
     const { itemid } = await params;
 
-    const token = req.headers
-      .get("Authorization")
-      ?.split("Bearer ")[1];
+    const token = req.headers.get("Authorization")?.split("Bearer ")[1];
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -56,12 +54,11 @@ export async function PATCH(req, { params }) {
     await owner.save();
 
     item.isFound = true;
+    item.foundBy = founder._id;
+    item.foundAt = new Date().toLocaleString();
     await item.save();
 
-    return NextResponse.json(
-      { success: true, owner, item },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, owner, item }, { status: 200 });
   } catch {
     return NextResponse.json(
       { success: false, error: "Internal Server Error" },

@@ -10,9 +10,7 @@ export async function PATCH(req, { params }) {
 
     const { itemid } = await params;
 
-    const token = req.headers
-      .get("Authorization")
-      ?.split("Bearer ")[1];
+    const token = req.headers.get("Authorization")?.split("Bearer ")[1];
 
     if (!token) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -25,10 +23,10 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ error: "Invalid Token" }, { status: 401 });
     }
 
-    const founder = await User.findOne({ email: decoded.email });
-    if (!founder) {
+    const ownerUser = await User.findOne({ email: decoded.email });
+    if (!ownerUser) {
       return NextResponse.json(
-        { error: "Founder user not found" },
+        { error: "Owner user not found" },
         { status: 404 }
       );
     }
@@ -37,7 +35,6 @@ export async function PATCH(req, { params }) {
     if (!item) {
       return NextResponse.json({ error: "Item not found" }, { status: 404 });
     }
-
     const owner = await User.findById(item.postedBy);
     if (!owner) {
       return NextResponse.json(
@@ -46,22 +43,34 @@ export async function PATCH(req, { params }) {
       );
     }
 
-    const msg = `Your item "${item.itemName}" has been resolved by ${
-      founder.name
-    }. Email: ${founder.email} | Phone: ${
-      founder.phone
-    } | Time: ${new Date().toLocaleString()}`;
+    // find the finder (if recorded)
+    let finder = null;
+    if (item.foundBy) {
+      finder = await User.findById(item.foundBy);
+    }
 
-    owner.notification.push(msg);
-    await owner.save();
+    // notify finder (if available) that owner confirmed resolution
+    if (finder) {
+      const msgToFinder = `Your report for "${
+        item.itemName
+      }" was confirmed received by ${ownerUser.name}. Email: ${
+        ownerUser.email
+      } | Time: ${new Date().toLocaleString()}`;
+      finder.notification.push(msgToFinder);
+      await finder.save();
+
+      // credit the finder for a successful return
+      await User.findByIdAndUpdate(finder._id, { $inc: { itemsReturned: 1 } });
+    }
+
+    // credit the owner for resolving a lost request
+    await User.findByIdAndUpdate(owner._id, { $inc: { totalLostRequests: 1 } });
 
     item.isResolved = true;
+    item.resolvedAt = new Date();
     await item.save();
 
-    return NextResponse.json(
-      { success: true, owner, item },
-      { status: 200 }
-    );
+    return NextResponse.json({ success: true, owner, item }, { status: 200 });
   } catch {
     return NextResponse.json(
       { success: false, error: "Internal Server Error" },

@@ -29,7 +29,6 @@ export async function POST(req) {
       );
     }
 
-    // Find admin
     const admin = await Admin.findOne({ email });
     if (!admin) {
       return NextResponse.json(
@@ -38,7 +37,6 @@ export async function POST(req) {
       );
     }
 
-    // Verify password
     const isValidPassword = await bcrypt.compare(password, admin.password);
     if (!isValidPassword) {
       return NextResponse.json(

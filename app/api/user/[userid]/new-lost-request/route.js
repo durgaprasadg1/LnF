@@ -93,8 +93,9 @@ export async function POST(req, { params }) {
 
     return NextResponse.json({ success: true, item: newItem });
   } catch (error) {
+    console.log("New Lost Error : ", error )
     return NextResponse.json(
-      { success: false, error: "Internal Server Error" },
+      { success: false, error: "Slow Internet connectivity." },
       { status: 500 }
     );
   }

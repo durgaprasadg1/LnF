@@ -41,7 +41,6 @@ export async function PATCH(req, { params }) {
 
     if (action === "warn") {
       const recipientEmail = user.email;
-      const recipientName = user.name || "User";
 
       try {
         await transporter.sendMail({

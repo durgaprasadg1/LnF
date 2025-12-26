@@ -60,6 +60,12 @@ const itemSchema = new Schema(
       required: true,
     },
 
+    // user who marked this item as found (if any)
+    foundBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+
     reportedAt: {
       type: Date,
       default: Date.now,

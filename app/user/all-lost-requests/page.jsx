@@ -70,7 +70,7 @@ export default function AllLostRequests() {
 
     try {
       setMarkingFoundId(itemId);
-
+      if(mongoUser?.phone != ""){
       const token = await user.getIdToken();
       const res = await fetch(`/api/items/${itemId}/found`, {
         method: "PATCH",
@@ -81,7 +81,6 @@ export default function AllLostRequests() {
       });
 
       const data = await res.json();
-
       if (!res.ok) {
         toast.error(data.error || "Something went wrong");
         return;
@@ -90,6 +89,10 @@ export default function AllLostRequests() {
       toast.success("Item marked as found");
       refreshMongoUser();
       setRefreshTick((prev) => prev + 1); 
+    }else{
+      toast.error("Please update your profile with a valid phone number before marking items as found.");
+      return;
+    }
     } catch (error) {
       console.error(error);
       toast.error("Failed to mark item as found");
@@ -108,13 +111,13 @@ export default function AllLostRequests() {
       )}
 
       <div className="p-4 flex justify-center gap-4">
-        <Link href="/user/new-lost-request">
+        <Link href={`user/${mongoUser?._id}/new-lost-request`}>
           <Button className="bg-slate-800 hover:bg-slate-900">
             New Lost Request
           </Button>
         </Link>
 
-        <Link href="/user/new-found-announcement">
+        <Link href={`user/${mongoUser?._id}/new-found-announcement`}>
           <Button className="bg-slate-800 hover:bg-slate-900">
             New Found Announcement
           </Button>

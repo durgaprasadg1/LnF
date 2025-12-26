@@ -8,6 +8,7 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [mongoUser, setMongoUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [admin, setAdmin] = useState(null);
 
   useEffect(() => {
@@ -25,6 +26,7 @@ export function AuthProvider({ children }) {
       if (!u) {
         setUser(null);
         setMongoUser(null);
+        setLoading(false);
         return;
       }
 
@@ -38,6 +40,7 @@ export function AuthProvider({ children }) {
 
       const data = await res.json();
       setMongoUser(data.user);
+      setLoading(false);
     });
     return () => unsub();
   }, []);
@@ -58,7 +61,9 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, mongoUser, admin, refreshMongoUser }}>
+    <AuthContext.Provider
+      value={{ user, mongoUser, admin, refreshMongoUser, loading }}
+    >
       {children}
     </AuthContext.Provider>
   );

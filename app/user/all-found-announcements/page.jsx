@@ -30,24 +30,21 @@ export default function AllFoundAnnouncements() {
     fetchItems();
   }, []);
 
-  // ✅ Filter once
   const visibleItems = useMemo(
     () => foundItems.filter((i) => i.isVerified && !i.isResolved),
     [foundItems]
   );
 
-  // ✅ Global loader
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-gray-700" />
+        <Loader2 className="text-4xl animate-spin text-gray-700" />
       </div>
     );
   }
 
   return (
     <>
-      {/* Info banner (instead of marquee) */}
       {visibleItems.length > 0 && (
         <div className="bg-blue-50 border border-blue-200 text-blue-800 text-sm px-4 py-2 text-center">
           Found item announcements are visible after admin verification.
@@ -55,15 +52,14 @@ export default function AllFoundAnnouncements() {
         </div>
       )}
 
-      {/* Actions */}
-      <div className="p-4 flex justify-center gap-4">
-        <Link href="/user/new-lost-request">
+       <div className="p-4 flex justify-center gap-4">
+        <Link href={`user/${mongoUser?._id}/new-lost-request`}>
           <Button className="bg-slate-800 hover:bg-slate-900">
             New Lost Request
           </Button>
         </Link>
 
-        <Link href="/user/new-found-announcement">
+        <Link href={`user/${mongoUser?._id}/new-found-announcement`}>
           <Button className="bg-slate-800 hover:bg-slate-900">
             New Found Announcement
           </Button>

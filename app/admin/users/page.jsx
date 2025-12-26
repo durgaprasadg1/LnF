@@ -47,7 +47,7 @@ export default function AdminUsersPage() {
         body: JSON.stringify({ action: "block" }),
       });
 
-      if (!res.ok) throw new Error("Failed to block user");
+      if (!res.ok) toast.error("Failed to block user");
       if (mongoUser?.isBlocked) {
         toast.error("User has been blocked");
         return;

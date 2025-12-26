@@ -6,12 +6,15 @@ import Navbar from "../Components/Others/Navbar";
 import AccountBlockedBox from "../Components/Others/AccountBlockedBox";
 
 export default function UserLayout({ children }) {
-  const { user, admin , mongoUser} = useAuth();
+  const { user, admin, mongoUser, loading } = useAuth();
   const router = useRouter();
-  if(mongoUser?.isBlocked){
-        return <AccountBlockedBox/>;
-      }
+  if (!loading && mongoUser?.isBlocked) {
+    return <AccountBlockedBox />;
+  }
+
   useEffect(() => {
+    if (loading) return;
+
     const adminSession = localStorage.getItem("adminSession");
     if (adminSession) {
       router.push("/admin");
@@ -22,7 +25,7 @@ export default function UserLayout({ children }) {
       router.push("/login");
       return;
     }
-  }, [user, admin, router]);
+  }, [user, admin, router, loading]);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

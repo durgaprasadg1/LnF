@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import imageCompression from "browser-image-compression";
-import { toast } from "react-hot-toast";
+import { toast } from "react-toastify";
 import {
   Select,
   SelectContent,
