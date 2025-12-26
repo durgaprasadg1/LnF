@@ -110,7 +110,7 @@ export default function NewLostRequest() {
         return;
       }
 
-      toast.success("Lost item reported successfully!");
+      toast.success("Lost item reported successfully! , Please wait for admin approval.");
       router.refresh();
       router.push("/user/all-lost-requests");
     } catch (error) {

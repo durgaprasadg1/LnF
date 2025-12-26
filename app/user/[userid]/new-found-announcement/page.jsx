@@ -117,7 +117,7 @@ export default function NewFoundAnnouncement({ params }) {
         return;
       }
 
-      toast.success("Found item announced successfully!");
+      toast.success("Found item announced listed successfully! , Please wait for admin approval.");
       router.refresh();
       router.push("/user/all-found-announcements");
     } catch (error) {
