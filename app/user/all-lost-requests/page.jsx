@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useMemo, useCallback } from "react";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
@@ -23,7 +24,8 @@ export default function AllLostRequests() {
   const [lostItems, setLostItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [markingFoundId, setMarkingFoundId] = useState(null);
-  const [refreshTick, setRefreshTick] = useState(0);  
+  const [refreshTick, setRefreshTick] = useState(0);
+  const [search, setSearch] = useState("");
 
   const { user, mongoUser, refreshMongoUser } = useAuth();
 
@@ -52,10 +54,20 @@ export default function AllLostRequests() {
     return () => clearInterval(interval);
   }, []);
 
-  const visibleItems = useMemo(
+  const visibleBase = useMemo(
     () => lostItems.filter((i) => i.isVerified && !i.isResolved),
     [lostItems]
   );
+
+  const visibleItems = useMemo(() => {
+    const q = (search || "").trim().toLowerCase();
+    if (!q) return visibleBase;
+    return visibleBase.filter((i) => {
+      const name = (i.itemName || "").toLowerCase();
+      const cat = (i.category || "").toLowerCase();
+      return name.includes(q) || cat.includes(q);
+    });
+  }, [visibleBase, search]);
 
   const handleMarkFound = async (itemId) => {
     if (!user) {
@@ -70,29 +82,31 @@ export default function AllLostRequests() {
 
     try {
       setMarkingFoundId(itemId);
-      if(mongoUser?.phone != ""){
-      const token = await user.getIdToken();
-      const res = await fetch(`/api/items/${itemId}/found`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      if (mongoUser?.phone != "") {
+        const token = await user.getIdToken();
+        const res = await fetch(`/api/items/${itemId}/found`, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      const data = await res.json();
-      if (!res.ok) {
-        toast.error(data.error || "Something went wrong");
+        const data = await res.json();
+        if (!res.ok) {
+          toast.error(data.error || "Something went wrong");
+          return;
+        }
+
+        toast.success("Item marked as found");
+        refreshMongoUser();
+        setRefreshTick((prev) => prev + 1);
+      } else {
+        toast.error(
+          "Please update your profile with a valid phone number before marking items as found."
+        );
         return;
       }
-
-      toast.success("Item marked as found");
-      refreshMongoUser();
-      setRefreshTick((prev) => prev + 1); 
-    }else{
-      toast.error("Please update your profile with a valid phone number before marking items as found.");
-      return;
-    }
     } catch (error) {
       console.error(error);
       toast.error("Failed to mark item as found");
@@ -105,23 +119,34 @@ export default function AllLostRequests() {
     <>
       {visibleItems.length > 0 && (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm px-4 py-2 text-center mt-2">
-          Lost item requests appear after admin verification.
-          Listings are automatically removed after 10 days.
+          Lost item requests appear after admin verification. Listings are
+          automatically removed after 10 days.
         </div>
       )}
 
-      <div className="p-4 flex justify-center gap-4">
-        <Link href={`user/${mongoUser?._id}/new-lost-request`}>
-          <Button className="bg-slate-800 hover:bg-slate-900">
-            New Lost Request
-          </Button>
-        </Link>
+      <div className="p-4 flex flex-col items-center gap-4">
+        <div className="w-full max-w-2xl px-4">
+          <Input
+            placeholder="Search by item name or category..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="mb-4"
+          />
+        </div>
 
-        <Link href={`user/${mongoUser?._id}/new-found-announcement`}>
-          <Button className="bg-slate-800 hover:bg-slate-900">
-            New Found Announcement
-          </Button>
-        </Link>
+        <div className="flex gap-4">
+          <Link href={`user/${mongoUser?._id}/new-lost-request`}>
+            <Button className="bg-slate-800 hover:bg-slate-900">
+              New Lost Request
+            </Button>
+          </Link>
+
+          <Link href={`user/${mongoUser?._id}/new-found-announcement`}>
+            <Button className="bg-slate-800 hover:bg-slate-900">
+              New Found Announcement
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {!loading && visibleItems.length === 0 && (
@@ -185,8 +210,7 @@ export default function AllLostRequests() {
                   </p>
 
                   <p className="text-gray-400 text-xs mt-2 mb-3">
-                    Reported on{" "}
-                    {new Date(item.reportedAt).toLocaleDateString()}
+                    Reported on {new Date(item.reportedAt).toLocaleDateString()}
                   </p>
 
                   {user && mongoUser ? (
@@ -199,9 +223,7 @@ export default function AllLostRequests() {
                         </DialogTrigger>
 
                         <DialogContent className="sm:max-w-md">
-                          <DialogTitle>
-                            {item.postedBy?.name}
-                          </DialogTitle>
+                          <DialogTitle>{item.postedBy?.name}</DialogTitle>
                           <p className="text-sm">
                             Phone: {item.postedBy?.phone}
                           </p>
@@ -230,8 +252,7 @@ export default function AllLostRequests() {
                       <Button
                         className="bg-green-600 hover:bg-green-700 text-white"
                         disabled={
-                          item.isResolved ||
-                          markingFoundId === item._id
+                          item.isResolved || markingFoundId === item._id
                         }
                         onClick={() => handleMarkFound(item._id)}
                       >

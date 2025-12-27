@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Loader2 } from "lucide-react";
@@ -13,6 +15,9 @@ import { toast } from "react-hot-toast";
 export default function AllFoundAnnouncements() {
   const [foundItems, setFoundItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  const { mongoUser } = useAuth();
 
   useEffect(() => {
     async function fetchItems() {
@@ -30,10 +35,20 @@ export default function AllFoundAnnouncements() {
     fetchItems();
   }, []);
 
-  const visibleItems = useMemo(
+  const visibleBase = useMemo(
     () => foundItems.filter((i) => i.isVerified && !i.isResolved),
     [foundItems]
   );
+
+  const visibleItems = useMemo(() => {
+    const q = (search || "").trim().toLowerCase();
+    if (!q) return visibleBase;
+    return visibleBase.filter((i) => {
+      const name = (i.itemName || "").toLowerCase();
+      const cat = (i.category || "").toLowerCase();
+      return name.includes(q) || cat.includes(q);
+    });
+  }, [visibleBase, search]);
 
   if (loading) {
     return (
@@ -52,24 +67,33 @@ export default function AllFoundAnnouncements() {
         </div>
       )}
 
-       <div className="p-4 flex justify-center gap-4">
-        <Link href={`user/${mongoUser?._id}/new-lost-request`}>
-          <Button className="bg-slate-800 hover:bg-slate-900">
-            New Lost Request
-          </Button>
-        </Link>
+      <div className="p-4 flex flex-col items-center gap-4">
+        <div className="w-full max-w-2xl px-4">
+          <Input
+            placeholder="Search by item name or category..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="mb-4"
+          />
+        </div>
 
-        <Link href={`user/${mongoUser?._id}/new-found-announcement`}>
-          <Button className="bg-slate-800 hover:bg-slate-900">
-            New Found Announcement
-          </Button>
-        </Link>
+        <div className="flex gap-4">
+          <Link href={`user/${mongoUser?._id}/new-lost-request`}>
+            <Button className="bg-slate-800 hover:bg-slate-900">
+              New Lost Request
+            </Button>
+          </Link>
+
+          <Link href={`user/${mongoUser?._id}/new-found-announcement`}>
+            <Button className="bg-slate-800 hover:bg-slate-900">
+              New Found Announcement
+            </Button>
+          </Link>
+        </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8">
-        <h1 className="text-4xl font-bold mb-10 text-center">
-          Found Items
-        </h1>
+        <h1 className="text-4xl font-bold mb-10 text-center">Found Items</h1>
 
         {/* Empty state */}
         {visibleItems.length === 0 && (
@@ -117,9 +141,7 @@ export default function AllFoundAnnouncements() {
                     />
                   </div>
 
-                  <h2 className="text-xl font-semibold">
-                    {item.itemName}
-                  </h2>
+                  <h2 className="text-xl font-semibold">{item.itemName}</h2>
 
                   <Badge className="mt-2">{item.category}</Badge>
 
@@ -134,8 +156,7 @@ export default function AllFoundAnnouncements() {
                   </p>
 
                   <p className="text-gray-400 text-xs mt-3">
-                    Posted on{" "}
-                    {new Date(item.reportedAt).toLocaleDateString()}
+                    Posted on {new Date(item.reportedAt).toLocaleDateString()}
                   </p>
                 </CardContent>
               </Card>
