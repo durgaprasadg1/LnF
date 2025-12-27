@@ -10,10 +10,12 @@ import { Input } from "@/components/ui/input";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "react-toastify";
 import Navbar from "@/app/Components/NonUser/Navbar";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
@@ -66,12 +68,26 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            <Input
-              type="password"
-              placeholder="Your password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="Your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600"
+              >
+                {showPassword ? (
+                  <AiOutlineEyeInvisible size={18} />
+                ) : (
+                  <AiOutlineEye size={18} />
+                )}
+              </button>
+            </div>
 
             <Button
               type="submit"

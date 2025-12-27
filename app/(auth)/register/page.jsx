@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import { toast } from "react-toastify";
 import Navbar from "@/app/Components/NonUser/Navbar";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 export default function SignupPage() {
   const { user, mongoUser } = useAuth();
@@ -17,6 +18,7 @@ export default function SignupPage() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -54,7 +56,7 @@ export default function SignupPage() {
       await googleSignin({ create: true });
       router.push("/");
     } catch {
-     console.error("Google signup error");
+      console.error("Google signup error");
     } finally {
       setLoading(false);
     }
@@ -78,12 +80,26 @@ export default function SignupPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
 
-            <Input
-              type="password"
-              placeholder="Password (min 6 chars)"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                type={showPassword ? "text" : "password"}
+                placeholder="Password (min 6 chars)"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+              />
+              <button
+                type="button"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword((s) => !s)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-600"
+              >
+                {showPassword ? (
+                  <AiOutlineEyeInvisible size={18} />
+                ) : (
+                  <AiOutlineEye size={18} />
+                )}
+              </button>
+            </div>
 
             <Button
               type="submit"
@@ -105,7 +121,6 @@ export default function SignupPage() {
           >
             <FcGoogle size={20} />
             Sign Up with Google
-            
           </Button>
 
           <p className="mt-6 text-sm text-center text-gray-600">

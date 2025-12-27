@@ -11,6 +11,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { toast } from "react-hot-toast";
+import LostFoundButtons from "@/app/Components/Others/LostFoundButtons";
 
 export default function AllFoundAnnouncements() {
   const [foundItems, setFoundItems] = useState([]);
@@ -77,19 +78,7 @@ export default function AllFoundAnnouncements() {
           />
         </div>
 
-        <div className="flex gap-4">
-          <Link href={`user/${mongoUser?._id}/new-lost-request`}>
-            <Button className="bg-slate-800 hover:bg-slate-900">
-              New Lost Request
-            </Button>
-          </Link>
-
-          <Link href={`user/${mongoUser?._id}/new-found-announcement`}>
-            <Button className="bg-slate-800 hover:bg-slate-900">
-              New Found Announcement
-            </Button>
-          </Link>
-        </div>
+        <LostFoundButtons/>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 py-8">

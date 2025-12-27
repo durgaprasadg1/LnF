@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 import { toast } from "react-toastify";
+import LostFoundButtons from "@/app/Components/Others/LostFoundButtons";
 
 export default function AllLostRequests() {
   const [lostItems, setLostItems] = useState([]);
@@ -134,19 +135,7 @@ export default function AllLostRequests() {
           />
         </div>
 
-        <div className="flex gap-4">
-          <Link href={`user/${mongoUser?._id}/new-lost-request`}>
-            <Button className="bg-slate-800 hover:bg-slate-900">
-              New Lost Request
-            </Button>
-          </Link>
-
-          <Link href={`user/${mongoUser?._id}/new-found-announcement`}>
-            <Button className="bg-slate-800 hover:bg-slate-900">
-              New Found Announcement
-            </Button>
-          </Link>
-        </div>
+        <LostFoundButtons/>
       </div>
 
       {!loading && visibleItems.length === 0 && (
