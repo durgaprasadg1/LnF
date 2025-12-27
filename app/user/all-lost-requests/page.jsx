@@ -216,6 +216,12 @@ export default function AllLostRequests() {
                           <p className="text-sm">
                             Phone: {item.postedBy?.phone}
                           </p>
+                          <p className="text-sm">
+                            Email: {item.postedBy?.email}
+                          </p>
+                          <p className="text-sm">
+                            Department : {item.postedBy?.department}
+                          </p>
 
                           <div className="w-full h-52 bg-gray-100 rounded-lg overflow-hidden mt-4">
                             <Image
