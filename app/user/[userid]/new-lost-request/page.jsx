@@ -26,6 +26,7 @@ export default function NewLostRequest() {
     lostAt: "",
     category: "Other",
     itemImage: null,
+    phone: mongoUser?.phone || "",
   });
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -58,6 +59,7 @@ export default function NewLostRequest() {
     const descRegex = /^.{5,500}$/s;
     const placeRegex = /^[A-Za-z0-9\s\,\-\#]{3,200}$/;
     const imgRegex = /^data:image\/(png|jpeg|jpg);base64,/;
+    const phoneRegex = /^[0-9\-\+\s\(\)]{7,15}$/;
 
     if (!form.itemName || !nameRegex.test(form.itemName)) {
       toast.error("Enter a valid item name (2-100 characters)");
@@ -69,6 +71,10 @@ export default function NewLostRequest() {
     }
     if (!form.lostAt || !placeRegex.test(form.lostAt)) {
       toast.error("Enter a valid 'Lost At' location");
+      return;
+    }
+    if (!phoneRegex.test(form.phone || "")) {
+      toast.error("Enter a valid contact number");
       return;
     }
     const allowed = [
@@ -110,7 +116,9 @@ export default function NewLostRequest() {
         return;
       }
 
-      toast.success("Lost item reported successfully! , Please wait for admin approval.");
+      toast.success(
+        "Lost item reported successfully! , Please wait for admin approval."
+      );
       router.refresh();
       router.push("/user/all-lost-requests");
     } catch (error) {
@@ -127,8 +135,13 @@ export default function NewLostRequest() {
       </div>
     );
   }
-  if(loading){
-    return <div className="min-h-screen flex items-center justify-center  "> <Loader2 className="animate-spin" /></div>
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center  ">
+        {" "}
+        <Loader2 className="animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -140,6 +153,7 @@ export default function NewLostRequest() {
           <label className="text-sm">Item Name</label>
           <Input
             className="w-full border p-2 rounded-md"
+            placeholder="e.g., Black Wallet, iPhone 12"
             value={form.itemName}
             onChange={(e) => setForm({ ...form, itemName: e.target.value })}
           />
@@ -149,6 +163,7 @@ export default function NewLostRequest() {
           <label className="text-sm">Description</label>
           <textarea
             className="w-full border p-2 rounded-md"
+            placeholder="Red in Color..."
             rows={3}
             value={form.description}
             onChange={(e) => setForm({ ...form, description: e.target.value })}
@@ -159,6 +174,7 @@ export default function NewLostRequest() {
           <label className="text-sm">Lost At</label>
           <Input
             className="w-full border p-2 rounded-md"
+            placeholder="Enter the location where you lost the item"
             value={form.lostAt}
             onChange={(e) => setForm({ ...form, lostAt: e.target.value })}
           />
@@ -185,6 +201,15 @@ export default function NewLostRequest() {
               </SelectGroup>
             </SelectContent>
           </Select>
+        </div>
+        <div>
+          <label className="text-sm">Phone</label>
+          <Input
+            placeholder="Enter your contact number"
+            className="w-full border p-2 rounded-md"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
         </div>
 
         <div>

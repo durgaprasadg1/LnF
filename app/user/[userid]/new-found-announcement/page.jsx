@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 
-export default function NewFoundAnnouncement({ params }) {
+export default function NewFoundAnnouncement() {
   const { user, mongoUser } = useAuth();
   const router = useRouter();
 
@@ -26,6 +26,7 @@ export default function NewFoundAnnouncement({ params }) {
     foundAt: "",
     category: "Other",
     itemImage: null,
+    phone: mongoUser?.phone || "",
   });
 
   const [preview, setPreview] = useState(null);
@@ -64,6 +65,7 @@ export default function NewFoundAnnouncement({ params }) {
     const descRegex = /^.{5,500}$/s;
     const placeRegex = /^[A-Za-z0-9\s\,\-\#]{3,200}$/;
     const imgRegex = /^data:image\/(png|jpeg|jpg);base64,/;
+    const phoneRegex = /^[0-9\-\+\s\(\)]{7,15}$/;
 
     if (!form.itemName || !nameRegex.test(form.itemName)) {
       toast.error("Enter a valid item name (2-100 characters)");
@@ -75,6 +77,10 @@ export default function NewFoundAnnouncement({ params }) {
     }
     if (!form.foundAt || !placeRegex.test(form.foundAt)) {
       toast.error("Enter a valid 'Found At' location");
+      return;
+    }
+    if (!phoneRegex.test(form.phone || "")) {
+      toast.error("Enter a valid contact number in your profile");
       return;
     }
     const allowed = [
@@ -117,7 +123,9 @@ export default function NewFoundAnnouncement({ params }) {
         return;
       }
 
-      toast.success("Found item announced listed successfully! , Please wait for admin approval.");
+      toast.success(
+        "Found item announced listed successfully! , Please wait for admin approval."
+      );
       router.refresh();
       router.push("/user/all-found-announcements");
     } catch (error) {
@@ -128,10 +136,13 @@ export default function NewFoundAnnouncement({ params }) {
     }
   }
 
-    if(loading){
-    return(<div className="">
-      <Loader2 className="animate-spin text-3xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
-    </div>)}
+  if (loading) {
+    return (
+      <div className="">
+        <Loader2 className="animate-spin text-3xl fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+      </div>
+    );
+  }
   return (
     <div className="max-w-xl mx-auto p-6">
       <h1 className="text-3xl font-bold mb-6">Report Found Item</h1>
@@ -185,6 +196,14 @@ export default function NewFoundAnnouncement({ params }) {
               </SelectGroup>
             </SelectContent>
           </Select>
+        </div>
+        <div>
+          <label className="text-sm">Phone</label>
+          <Input
+            className="w-full border p-2 rounded-md"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
         </div>
 
         <div>

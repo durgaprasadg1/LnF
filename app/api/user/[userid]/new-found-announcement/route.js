@@ -89,6 +89,7 @@ export async function POST(req, { params }) {
 
     await User.findByIdAndUpdate(userid, {
       $inc: { itemsReturned: 1 },
+      phone: body.phone,
     });
 
     return NextResponse.json({ success: true, item: newItem });

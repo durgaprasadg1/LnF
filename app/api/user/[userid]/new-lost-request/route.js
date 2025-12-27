@@ -89,11 +89,12 @@ export async function POST(req, { params }) {
 
     await User.findByIdAndUpdate(userid, {
       $inc: { totalLostRequests: 1 },
+      phone: body.phone,
     });
 
     return NextResponse.json({ success: true, item: newItem });
   } catch (error) {
-    console.log("New Lost Error : ", error )
+    console.log("New Lost Error : ", error);
     return NextResponse.json(
       { success: false, error: "Slow Internet connectivity." },
       { status: 500 }
